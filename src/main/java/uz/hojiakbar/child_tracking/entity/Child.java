@@ -1,0 +1,66 @@
+package uz.hojiakbar.child_tracking.entity;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import uz.hojiakbar.child_tracking.enums.Gender;
+import uz.hojiakbar.child_tracking.enums.Status;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+@Entity(name = "child")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Child {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", unique = true)
+    UUID id;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    List<Users> parents = new ArrayList<>();
+
+    @Column(unique = true)
+    String phone;
+
+    @Column(unique = true )
+    String password_hash;
+
+    int age ;
+
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    Status verified = Status.NOT_VERIFIED;
+
+    String full_name;
+
+    String avatar_url;
+
+
+    Date date_of_birth;
+
+    @Enumerated(EnumType.STRING)
+    Gender gender;
+
+    Boolean isActive = true;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    LocalDateTime created_at;
+
+    @UpdateTimestamp
+    LocalDateTime updated_at;
+
+}
