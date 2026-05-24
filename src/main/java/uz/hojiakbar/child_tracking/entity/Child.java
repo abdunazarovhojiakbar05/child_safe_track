@@ -28,27 +28,27 @@ public class Child {
     @Column(name = "id", unique = true)
     UUID id;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "child_parents",
+            joinColumns = @JoinColumn(name = "child_id"),
+            inverseJoinColumns = @JoinColumn(name = "parent_id"))
     List<Users> parents = new ArrayList<>();
 
     @Column(unique = true)
     String phone;
 
-    @Column(unique = true )
-    String password_hash;
+    int age;
 
-    int age ;
-
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     Status verified = Status.NOT_VERIFIED;
+
+    String email;
 
     String full_name;
 
     String avatar_url;
 
-
+    @Column(name = "date_of_birth")
     Date date_of_birth;
 
     @Enumerated(EnumType.STRING)
@@ -62,5 +62,4 @@ public class Child {
 
     @UpdateTimestamp
     LocalDateTime updated_at;
-
 }

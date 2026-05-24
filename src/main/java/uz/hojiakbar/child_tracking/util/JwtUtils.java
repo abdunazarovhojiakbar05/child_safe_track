@@ -24,30 +24,42 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email) {
-        long expirationTime = 1000L * 60 * 60 * 24 * 3;
+    // ✅ Nom to'g'irlandi: email emas, username (email yoki phone bo'lishi mumkin)
+    public String generateToken(String username) {
+        long expirationTime = 1000L * 60 * 60 * 24 * 3; // 3 kun
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getKey())
                 .compact();
     }
 
+    public String generateRefreshToken(String username) {
+        long refreshTokenExpirationTime = 1000L * 60 * 60 * 24 * 30; // 30 kun
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
+                .signWith(getKey())
+                .compact();
+    }
 
-
-    public String getEmailFromToken(String token) {
+     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            System.out.println("Token valid: " + true);
             return getClaims(token).getExpiration().after(new Date());
         } catch (Exception e) {
-            System.out.println("Token invalid reason: " + e.getMessage());
+            System.out.println("Token invalid: " + e.getMessage());
             return false;
         }
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        return getClaims(token).getExpiration();
     }
 
     private Claims getClaims(String token) {
@@ -57,20 +69,4 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
-    public String generateRefreshToken(String email) {
-        long refreshTokenExpirationTime = 1000L * 60 * 60 * 24 * 30; // 30 kun || bir oy
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
-                .signWith(getKey())
-                .compact();
-    }
-
-
-    public Date getExpirationDateFromToken(String token) {
-        return getClaims(token).getExpiration();
-    }
 }
-

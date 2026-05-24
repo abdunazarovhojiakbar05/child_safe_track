@@ -21,18 +21,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        System.out.println(username);
-
-         Users user = usersRepository.findByEmail(username);
-
-
+        // 1. Parent — email bilan
+        Users user = usersRepository.findByEmail(username);
         if (user != null) {
             return new CustomUserDetails(user);
         }
 
-        Child child = childRepository.findByPhone(username);
-        if (child != null) {
-            return new CustomUserDetails(child);
+        // 2. Child — phone bilan (register dan keyingi tokenlar)
+        Child childByPhone = childRepository.findByPhone(username);
+        if (childByPhone != null) {
+            return new CustomUserDetails(childByPhone);
+        }
+
+        // 3. Child — email bilan (invite tokenlar, register dan oldin)  ✅ YANGI
+        Child childByEmail = childRepository.findByEmail(username);
+        if (childByEmail != null) {
+            return new CustomUserDetails(childByEmail);
         }
 
         throw new UsernameNotFoundException("Foydalanuvchi topilmadi: " + username);

@@ -11,11 +11,8 @@ import uz.hojiakbar.child_tracking.entity.Users;
 
 public interface ChildService {
 
-    String verifyCode(ChildRequestDto dto );
-
-
     @Transactional
-    RegisterResponseDto registerChildAndLink(@Valid RegisterChildRequestDto request);
+    RegisterResponseDto registerChildAndLink(@Valid RegisterChildRequestDto request );
 
 
- }
+}

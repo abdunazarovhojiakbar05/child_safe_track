@@ -29,6 +29,7 @@ public class AuthController {
         ///     TODO  TELEGRAM VA SMS UCHUN ALOHIDA KOD YUBORADIGAN API CHIQARISH KERAK KEYINCHALIK
     }
 
+
     @Operation(summary = "Ota-ona login verify", description = "Ota-ona emailga kelgan maxfiy kod bilan emailni yuboradi va tizimga kiradi.")
     @PostMapping("/verify")
     public ResponseEntity<LoginResponseDto> verify(@Valid @RequestBody LoginRequestDto requestDto) {

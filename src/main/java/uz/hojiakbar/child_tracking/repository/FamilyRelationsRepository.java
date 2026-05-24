@@ -12,11 +12,9 @@ import java.util.UUID;
 
 public interface FamilyRelationsRepository extends JpaRepository<Family_Relations, UUID> {
 
-    @org.springframework.data.jpa.repository.Query("select f from family_relations f where f.invite_code = :inviteCode")
-    Optional<Family_Relations> findByInvite_code(String inviteCode);
+        List<Family_Relations> findByParentEmail(String email);
 
-    List<Family_Relations> findByParentEmail(String email);
+         @Query("SELECT f FROM family_relations f WHERE f.child.email = :email")
+        Optional<Family_Relations> findByChildEmail(@Param("email") String email);
+    }
 
-    @Query("SELECT fr.child FROM family_relations fr JOIN fr.child WHERE fr.parent.email = :email")
-    List<Child> findChildrenByParentEmail(@Param("email") String email);
-}

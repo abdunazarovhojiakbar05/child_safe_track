@@ -28,19 +28,24 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-
                         .requestMatchers(
                                 "/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs/**", "/v3/api-docs",
                                 "/swagger-resources/**", "/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/api/v1/parent/**").authenticated()
-                        .requestMatchers("/api/auth/**",
-                                "/api/v1/child/join-family",
-                                "/api/v1/child/register").permitAll()
+
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/v1/parent/add-child",
+                                "/api/v1/child/register"
+                        ).permitAll()
+
+                        .requestMatchers("/api/v1/location/send").hasRole("CHILD")   // faqat child
+                        .requestMatchers("/api/v1/location/**").hasRole("PARENT")    // faqat parent
+                        .requestMatchers("/api/v1/parent/**").hasRole("PARENT")// ← o'zgartiring
+                        .requestMatchers("/api/v1/geofences/**").hasRole("PARENT")
                         .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -22,34 +22,35 @@ public class Geofences {
 
     @Id
     @GeneratedValue
-     UUID id ;
+    UUID id ;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id", nullable = false)
-    Users child_id;
+    Child child;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    Users createdBy;
 
     @Column(nullable = false)
     String name;
 
-    BigDecimal center_lat;
+    BigDecimal centerLat;
 
-    BigDecimal center_lon;
+    BigDecimal centerLon;
 
-    BigDecimal radius_metres;
+    BigDecimal radiusMetres;
 
     @Enumerated(EnumType.STRING)
     Geofences_Type type;
 
     boolean isActive = true;
-    boolean notify_on_enter = true;
-    boolean notify_on_exit = true;
+    boolean notifyOnEnter = true;
+    boolean notifyOnExit = true;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    Users created_by; //   By Parent
 
     @CreationTimestamp
-    Timestamp created_at;
+    Timestamp createdAt;
 
 }

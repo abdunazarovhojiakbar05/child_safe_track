@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface ChildRepository extends JpaRepository<Child, UUID> {
 
     Child findByPhone(String phone);
+
+    Child findByEmail(String email);
 }

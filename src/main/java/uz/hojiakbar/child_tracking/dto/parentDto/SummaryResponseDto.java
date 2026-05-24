@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class SummaryResponseDto {
 
-    private Long activeChildren;
-    private Long totalAlertsToday;
-    private Long unreadAlerts;
+    private int activeChildren;
+    private int totalAlertsToday;
+    private int unreadAlerts;
 }

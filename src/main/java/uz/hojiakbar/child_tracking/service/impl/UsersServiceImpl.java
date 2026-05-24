@@ -22,6 +22,7 @@ import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
  import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
+import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
 import java.math.BigDecimal;
@@ -42,12 +43,14 @@ public class UsersServiceImpl implements UsersService {
 
 
     @Override
-    public ParentDashboardResponseDto getParentDashboard() {
+    public ParentDashboardResponseDto getParentDashboard(String emailUser) {
+
+        String email =   emailUser ;
 
         SummaryResponseDto summary = new SummaryResponseDto();
-        summary.setActiveChildren(1L);
-        summary.setTotalAlertsToday(3L);
-        summary.setUnreadAlerts(2L);
+        summary.setActiveChildren(activeChildren(email));
+        summary.setTotalAlertsToday(3);
+        summary.setUnreadAlerts(2);
 
         List<ChildDashboardDto> children = new ArrayList<>();                                 /////
         List<GeofenceResponseDto> geofences = new ArrayList<>();                             /////
@@ -60,7 +63,7 @@ public class UsersServiceImpl implements UsersService {
         location.setAddress(address);
         location.setLatitude(BigDecimal.valueOf(234.3456));
         location.setLongitude(BigDecimal.valueOf(345.3456));
-        location.setCratedAt(LocalDateTime.now());
+         location.setCreatedAt(LocalDateTime.now());
 
 
 /// --------------------------------------------------
@@ -86,7 +89,7 @@ public class UsersServiceImpl implements UsersService {
         alert.setSeverity(Alert_Severity.WARNING);
 
 
-        ///-----------------------------------------------------------------------------------------
+///-----------------------------------------------------------------------------------------
         children.add(new ChildDashboardDto(
                 UUID.randomUUID(),
                 "Kimsanov  Hoshim",
@@ -104,8 +107,37 @@ public class UsersServiceImpl implements UsersService {
         recentAlerts.add(alert);
 
 
+
+
         return new ParentDashboardResponseDto(summary, children, geofences, dailyActivitySummary, recentAlerts);
     }
+
+
+
+
+    private int activeChildren(String email) {
+            Users user = usersRepository.findByEmail(email);
+            if(user == null){
+                throw new ResourceNotFoundException("User not found with email: " + email);
+            }
+            return user.getChildren().size();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -118,37 +150,22 @@ public class UsersServiceImpl implements UsersService {
             throw new ResourceNotFoundException("xali farszandingiz yoq");
         }
 
-        final var verified = Status.VERIFIED;
-
-        for (int i = 0; i < list.size(); i++) {
-            if(list.get(i).getStatus() != verified){
-                list.get(i).setStatus(verified);
-            }
-
-        }
-
-        if (list.isEmpty()) {
-            throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
-        }
-
-        return list.stream().map(relation -> {
-            Child child = relation.getChild();
-            return ChildListResponseDto.builder()
-                    .id(child.getId())
-                    .full_name(child.getFull_name())
-                    .phone(child.getPhone())
-                    .avatar_url(child.getAvatar_url())
-                    .date_of_birth(child.getDate_of_birth())
-                    .verified(child.getVerified())
-                    .age(random.nextInt(10, 18))
-                    .build();
-        }).toList();
-
+        return list.stream()
+                .filter(relation -> relation.getChild() != null)
+                .map(relation -> {
+                    Child child = relation.getChild();
+                    return ChildListResponseDto.builder()
+                            .id(child.getId())
+                            .full_name(child.getFull_name())
+                            .phone(child.getPhone())
+                            .avatar_url(child.getAvatar_url())
+                            .date_of_birth(child.getDate_of_birth())
+                            .verified(child.getVerified())
+                            .age(random.nextInt(10, 18))
+                            .build();
+                }).toList();
     }
 
-    @Override
-    public Users getUserByEmail(String email) {
-        return usersRepository.findByEmail(email);
-    }
+
 }
 

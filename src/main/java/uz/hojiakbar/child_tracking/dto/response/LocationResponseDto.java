@@ -17,18 +17,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @FieldDefaults( level = lombok.AccessLevel.PRIVATE)
 public class LocationResponseDto {
-
-
-
     BigDecimal latitude;
-
     BigDecimal longitude;
-
-
     Address address;
-
-    LocalDateTime cratedAt;
-
-
+    Float speed;
+    Float accuracy;
+    Integer batteryLevel;
+    Boolean isCharging;
+    LocalDateTime recordedAt;
+    LocalDateTime createdAt;
 
 }

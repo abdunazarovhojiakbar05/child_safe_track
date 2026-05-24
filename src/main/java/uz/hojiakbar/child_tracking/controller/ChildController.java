@@ -15,6 +15,7 @@ import uz.hojiakbar.child_tracking.dto.childDto.ChildRequestDto;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterChildRequestDto;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
+import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.ChildService;
 
 @RestController
@@ -25,17 +26,12 @@ public class ChildController {
 
     private final ChildService childService;
 
-    @PostMapping("/join-family")
-    @Operation(summary = "Invite kodni tekshirish va ota-onaga ulanish")
-    public ResponseEntity<String> joinFamily(@RequestBody ChildRequestDto dto ) {
-        return ResponseEntity.ok(childService.verifyCode(dto ));
 
-    }
 
     @PostMapping("/register")
-    @Operation(summary = "Ota-onaga ulanish uchun boshqa ma'lumotlar toliq registratsiya qilish")
-    public ResponseEntity<RegisterResponseDto> registerChild(@Valid @RequestBody RegisterChildRequestDto request ) {
-        return ResponseEntity.ok(childService.registerChildAndLink(request ));
+    @Operation(summary = "Ota-onaga ulanish uchun boshqa ma'lumotlar toliq registratsiya qilish (gender fullname status birthDay phone qolgani keyin update qilinadi ) ")
+    public ResponseEntity<RegisterResponseDto> registerChild(@Valid @RequestBody RegisterChildRequestDto request  ) {
+        return ResponseEntity.ok(childService.registerChildAndLink(request));
 
     }
 

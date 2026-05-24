@@ -13,7 +13,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class ChildRequestDto {
 
-    String invite_code;
+    String email;
+
+    String name;
+
+
 
 
 }

@@ -28,15 +28,13 @@ public class Family_Relations {
     @JoinColumn(name = "parent_id", nullable = true)
     Users parent;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "child_id")
     Child child;
 
     @Enumerated(EnumType.STRING)
     Relation_Type type;
 
-    @Column(unique = true, nullable = true)
-    String invite_code;
 
     @Enumerated(EnumType.STRING)
     Status status;

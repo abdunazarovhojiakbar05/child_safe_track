@@ -5,15 +5,15 @@ import uz.hojiakbar.child_tracking.dto.childDto.ChildResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
 import uz.hojiakbar.child_tracking.entity.Users;
+import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UsersService {
 
-    ParentDashboardResponseDto getParentDashboard();
+    ParentDashboardResponseDto getParentDashboard(String userDetails);
 
     List< ChildListResponseDto>   getChildrenByParentEmail(String email);
 
-    Users getUserByEmail(String email);
-}
+ }

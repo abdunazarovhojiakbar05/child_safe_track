@@ -78,15 +78,15 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        // Parent → email, Child → phone (token subject bilan mos)
-        return isParent() ? users.getEmail() : child.getPhone();
+        if (isParent()) return users.getEmail();
+        // invite holatida phone null, email ishlatamiz
+        return (child.getPhone() != null) ? child.getPhone() : child.getEmail();
     }
-
     @Override
     public String getPassword() {
         return isParent()
                 ? (users.getPassword_hash() != null ? users.getPassword_hash() : "")
-                : (child.getPassword_hash() != null ? child.getPassword_hash() : "");
+                : null;
     }
 
     @Override
@@ -102,8 +102,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        // Keyinchalik: users.getIsActive() tekshirish mumkin
-        return true;
+         return true;
     }
 
     @Override

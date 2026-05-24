@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
         String email = requestDto.getEmail();
 
-         if (!email.contains("@") || !email.endsWith("gmail.com") || email.contains(" ")) {
+         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new RuntimeException("Email formati noto'g'ri!");
         }
 
@@ -186,7 +186,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Refresh token yaroqsiz yoki muddati o'tgan!");
         }
 
-        String email = jwtUtils.getEmailFromToken(refreshToken);
+        String email = jwtUtils.getUsernameFromToken(refreshToken);
         Users user = usersRepository.findByEmail(email);
         if (user == null) {
             throw new RuntimeException("Foydalanuvchi topilmadi!");
@@ -203,10 +203,10 @@ public class AuthServiceImpl implements AuthService {
             session.setCreatedAt(LocalDateTime.now());
             session.setExpiresAt(LocalDateTime.now().plusDays(7));
             session.setRevokedAt(LocalDateTime.now());
-         
+
             sessionRepository.save(session);
         });
-        
+
 
         Date expirationDate = jwtUtils.getExpirationDateFromToken(newAccessToken);
         long expires_in = (expirationDate != null) ? (expirationDate.getTime() - System.currentTimeMillis()) / 1000 : 900;
