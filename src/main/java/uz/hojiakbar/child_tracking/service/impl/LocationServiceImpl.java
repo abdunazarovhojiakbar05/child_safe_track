@@ -28,6 +28,7 @@ public class LocationServiceImpl implements LocationService {
     private final LocationsRepository locationsRepository;
     private final ChildRepository childRepository;
     private final GeofencesRepository geofencesRepository;
+    private final NotificationService notificationService;
 
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -96,17 +97,22 @@ public class LocationServiceImpl implements LocationService {
 
             boolean insideGeofence = distance <= geofence.getRadiusMetres().doubleValue();
 
-            if(!insideGeofence && geofence.isNotifyOnExit()){
-                System.out.println("⚠️ " + child.getFull_name() +
-                        " geofence dan chiqdi: " + geofence.getName());
+            if (!insideGeofence && geofence.isNotifyOnExit()) {
+                // ✅ Real notification
+                notificationService.sendNotification(
+                        geofence.getCreatedBy().getFcmToken(),
+                        "⚠️ Xavfsiz hudud",
+                        child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
+                );
             }
-
-
             if (insideGeofence && geofence.isNotifyOnEnter()) {
-                System.out.println("✅ " + child.getFull_name() +
-                        " geofence ga kirdi: " + geofence.getName());
+                // ✅ Real notification
+                notificationService.sendNotification(
+                        geofence.getCreatedBy().getFcmToken(),
+                        "✅ Xavfsiz hudud",
+                        child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
+                );
             }
-
         }
 
     }

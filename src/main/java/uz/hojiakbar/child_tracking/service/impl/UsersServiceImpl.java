@@ -166,6 +166,11 @@ public class UsersServiceImpl implements UsersService {
                 }).toList();
     }
 
+    @Override
+    public void save(Users parent) {
+        usersRepository.save(parent);
+    }
+
 
 }
 

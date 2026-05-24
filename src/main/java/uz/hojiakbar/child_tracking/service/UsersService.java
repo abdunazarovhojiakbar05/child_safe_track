@@ -16,4 +16,5 @@ public interface UsersService {
 
     List< ChildListResponseDto>   getChildrenByParentEmail(String email);
 
- }
+    void save(Users parent);
+}

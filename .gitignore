@@ -1,4 +1,5 @@
-src/main/resources/application.properties 
-target/ 
-.idea/ 
-*.iml 
+src/main/resources/application.properties
+target/
+.idea/
+*.iml
+src/main/resources/firebase-service-account.json

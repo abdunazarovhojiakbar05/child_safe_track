@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import uz.hojiakbar.child_tracking.dto.childDto.ChildRequestDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
+import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.FamilyRelationsService;
 import uz.hojiakbar.child_tracking.service.UsersService;
@@ -22,6 +23,8 @@ public class ParentController {
 
     private final UsersService parentService;
     private final FamilyRelationsService relationService;
+    private final UsersService usersRepository;
+    private final UsersService usersService;
 
 
     @GetMapping
@@ -58,7 +61,19 @@ public class ParentController {
 
     ///     GEOFENCES
 
+    @PutMapping("/fcm-token")
+    public ResponseEntity<String> updateFcmToken(
+            @RequestParam String fcmToken,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        Users parent = userDetails.getUsers();
+        if (parent == null) {
+            throw new RuntimeException("Faqat parent FCM token saqlashi mumkin!");
+        }
+        parent.setFcmToken(fcmToken);
+        usersService.save(parent);
+        return ResponseEntity.ok("FCM token saqlandi");
+    }
 
 
 

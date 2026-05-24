@@ -31,6 +31,9 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
+    @Column(name = "fcm_token")
+    String fcmToken;
+
     @Column(unique = true)
     String verification_code;
 
