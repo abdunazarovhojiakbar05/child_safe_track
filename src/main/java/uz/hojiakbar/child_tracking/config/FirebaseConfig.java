@@ -24,9 +24,9 @@ public class FirebaseConfig {
 
                 InputStream serviceAccount;
                 if (firebaseJson != null && !firebaseJson.isEmpty()) {
-                     serviceAccount = new ByteArrayInputStream(firebaseJson.getBytes());
+                    serviceAccount = new ByteArrayInputStream(firebaseJson.getBytes());
                 } else {
-                     serviceAccount = new FileInputStream(
+                    serviceAccount = new FileInputStream(
                             "src/main/resources/firebase-service-account.json"
                     );
                 }
