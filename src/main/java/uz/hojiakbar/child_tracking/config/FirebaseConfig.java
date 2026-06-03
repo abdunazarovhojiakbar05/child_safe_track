@@ -10,7 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.util.Base64;
 
 @Configuration
 public class FirebaseConfig {
@@ -20,12 +20,15 @@ public class FirebaseConfig {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
 
-                String firebaseJson = System.getenv("FIREBASE_SERVICE_ACCOUNT");
+                String firebaseBase64 = System.getenv("FIREBASE_SERVICE_ACCOUNT");
 
                 InputStream serviceAccount;
-                if (firebaseJson != null && !firebaseJson.isEmpty()) {
-                    serviceAccount = new ByteArrayInputStream(firebaseJson.getBytes());
+                if (firebaseBase64 != null && !firebaseBase64.isEmpty()) {
+                    // DIQQAT: Render'dan kelgan Base64 matnni tozalab, haqiqiy JSON baytlariga o'giramiz
+                    byte[] decodedBytes = Base64.getDecoder().decode(firebaseBase64.trim());
+                    serviceAccount = new ByteArrayInputStream(decodedBytes);
                 } else {
+                    // Lokal kompyuterda fayldan o'qish tizimi
                     serviceAccount = new FileInputStream(
                             "src/main/resources/firebase-service-account.json"
                     );
