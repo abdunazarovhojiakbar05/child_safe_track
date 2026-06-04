@@ -88,8 +88,7 @@ public class AuthServiceImpl implements AuthService {
 
             long expires_in = (expirationDate != null) ? (expirationDate.getTime() - System.currentTimeMillis()) / 1000 : 86400;
 
-            user.setVerification_code(null);
-            usersRepository.save(user);
+             usersRepository.save(user);
 
 
             Session session = Session.builder()
@@ -105,7 +104,12 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             sessionRepository.save(session);
 
-            return new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in , code);
+            LoginResponseDto loginResponseDto =  new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in , code);
+
+            user.setVerification_code(null);
+              usersRepository.save(user);
+
+            return  loginResponseDto;
         } else {
             throw new RuntimeException("Kod xato!");
         }
