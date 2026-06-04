@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import uz.hojiakbar.child_tracking.dto.childDto.ChildRequestDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
 import uz.hojiakbar.child_tracking.entity.Users;
@@ -15,6 +16,7 @@ import uz.hojiakbar.child_tracking.service.FamilyRelationsService;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/parent")
@@ -23,7 +25,6 @@ public class ParentController {
 
     private final UsersService parentService;
     private final FamilyRelationsService relationService;
-    private final UsersService usersRepository;
     private final UsersService usersService;
 
 
@@ -56,6 +57,11 @@ public class ParentController {
 
     }
 
+    @GetMapping("/child/{childId}")
+    @Operation(summary = "Ota-ona id orqali bolasini profilini korsihi || bola haqida toliq ma'lumot")
+     public ResponseEntity<ChildDashboardResponseDto> getChildById(@PathVariable UUID childId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(parentService.getChildById(childId, userDetails));
+    }
 
     /// ////////////////////////////////////////////////////////////////////////////////////
 

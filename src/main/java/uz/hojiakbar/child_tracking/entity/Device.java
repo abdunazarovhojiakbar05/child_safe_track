@@ -2,6 +2,7 @@ package uz.hojiakbar.child_tracking.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import uz.hojiakbar.child_tracking.enums.Platform;
@@ -15,11 +16,16 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 @Entity(name = "device")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+//@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Device {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id ;
+
+    UUID childID;
+
+    UUID userID;
+
     @Column(nullable = false)
     String device_name;
 
