@@ -55,8 +55,10 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Foydalanuvchi topilmadi!");
         }
 
+
+        String code = "";
         if (requestDto.getCode() == null) {
-            String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+             code = String.valueOf((int) (Math.random() * 900000) + 100000);
 
             user.setVerification_code(code);
             user.setCode_generated_at(LocalDateTime.now());
@@ -69,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (user.getCode_generated_at().plusMinutes(2).isBefore(now)) {
+        if (user.getCode_generated_at().plusMinutes(3).isBefore(now)) {
             throw new RuntimeException("Kod yuborilmagan yoki eskirgan !");
         }
 
@@ -103,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             sessionRepository.save(session);
 
-            return new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in );
+            return new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in , code);
         } else {
             throw new RuntimeException("Kod xato!");
         }

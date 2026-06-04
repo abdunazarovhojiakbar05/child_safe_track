@@ -19,6 +19,8 @@ public class LoginResponseDto {
 
     long expires_in;
 
+    String code;
+
 
 
 
