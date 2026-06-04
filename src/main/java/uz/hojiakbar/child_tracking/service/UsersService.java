@@ -2,6 +2,7 @@ package uz.hojiakbar.child_tracking.service;
 
 import org.springframework.http.ResponseEntity;
 import uz.hojiakbar.child_tracking.dto.childDto.ChildResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
 import uz.hojiakbar.child_tracking.entity.Users;
@@ -17,4 +18,6 @@ public interface UsersService {
     List< ChildListResponseDto>   getChildrenByParentEmail(String email);
 
     void save(Users parent);
+
+    ChildDashboardResponseDto getChildById(UUID childId, CustomUserDetails userDetails);
 }

@@ -3,24 +3,20 @@ package uz.hojiakbar.child_tracking.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.SummaryResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.*;
 import uz.hojiakbar.child_tracking.dto.response.ActivitySummaryResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.AlertResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.GeofenceResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
-import uz.hojiakbar.child_tracking.entity.Address;
-import uz.hojiakbar.child_tracking.entity.Child;
-import uz.hojiakbar.child_tracking.entity.Family_Relations;
-import uz.hojiakbar.child_tracking.entity.Users;
+import uz.hojiakbar.child_tracking.entity.*;
 import uz.hojiakbar.child_tracking.enums.Alert_Severity;
 import uz.hojiakbar.child_tracking.enums.Alert_Type;
 import uz.hojiakbar.child_tracking.enums.Geofences_Type;
 import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
- import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
+import uz.hojiakbar.child_tracking.repository.ChildRepository;
+import uz.hojiakbar.child_tracking.repository.DeviceRepository;
+import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
@@ -38,8 +34,10 @@ public class UsersServiceImpl implements UsersService {
 
 
     private final UsersRepository usersRepository;
+    private final ChildRepository childRepository;
     private final FamilyRelationsRepository familyRepository;
     private final Random random = new Random();
+    private final DeviceRepository deviceRepository;
 
 
     @Override
@@ -169,6 +167,24 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public void save(Users parent) {
         usersRepository.save(parent);
+    }
+
+    @Override
+    public ChildDashboardResponseDto getChildById(UUID childId, CustomUserDetails userDetails) {
+        Child child = childRepository.findById(childId).orElseThrow(() -> new ResourceNotFoundException("child not found"));
+
+        if(child == null ){
+            throw new ResourceNotFoundException("child not found");
+        }
+
+        if(userDetails.getUsers() == null){
+            throw new ResourceNotFoundException("parent not found");
+        }
+
+        //Device device = deviceRepository.findByChildId(childId).orElseThrow(() -> new ResourceNotFoundException("device not found"));
+
+        return new ChildDashboardResponseDto();
+
     }
 
 

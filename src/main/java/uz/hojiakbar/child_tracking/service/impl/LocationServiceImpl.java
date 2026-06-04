@@ -98,16 +98,14 @@ public class LocationServiceImpl implements LocationService {
             boolean insideGeofence = distance <= geofence.getRadiusMetres().doubleValue();
 
             if (!insideGeofence && geofence.isNotifyOnExit()) {
-                // ✅ Real notification
-                notificationService.sendNotification(
+                 notificationService.sendNotification(
                         geofence.getCreatedBy().getFcmToken(),
                         "⚠️ Xavfsiz hudud",
                         child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
                 );
             }
             if (insideGeofence && geofence.isNotifyOnEnter()) {
-                // ✅ Real notification
-                notificationService.sendNotification(
+                 notificationService.sendNotification(
                         geofence.getCreatedBy().getFcmToken(),
                         "✅ Xavfsiz hudud",
                         child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
