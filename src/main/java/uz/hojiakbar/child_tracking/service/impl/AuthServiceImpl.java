@@ -171,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
     @Async
     public void sendEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("abdunazarovhojiakbar@gmail.com");
+        message.setFrom("ad902a001@smtp-brevo.com");
         message.setTo(to);
         message.setSubject("Login Tasdiqlash Kodi");
         message.setText("Sizning bir martalik kodingiz: " + code);
