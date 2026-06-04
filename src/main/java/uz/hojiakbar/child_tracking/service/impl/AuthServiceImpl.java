@@ -56,9 +56,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
 
-        String code = "";
+            String code = "";
         if (requestDto.getCode() == null) {
-             code = String.valueOf((int) (Math.random() * 900000) + 100000);
+              code = String.valueOf((int) (Math.random() * 900000) + 100000);
 
             user.setVerification_code(code);
             user.setCode_generated_at(LocalDateTime.now());
@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
             sendEmail(user.getEmail(), code);
 
-            return new LoginResponseDto();
+            return new LoginResponseDto(new UserDto(), " keyin chiqadi ", "keyin chiqadi ", 1000000, code);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -104,12 +104,8 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             sessionRepository.save(session);
 
-            LoginResponseDto loginResponseDto =  new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in , code);
 
-            user.setVerification_code(null);
-              usersRepository.save(user);
-
-            return  loginResponseDto;
+            return new LoginResponseDto( new UserDto( user.getId(),  user.getFull_name() ), token, refreshToken,expires_in , code);
         } else {
             throw new RuntimeException("Kod xato!");
         }
