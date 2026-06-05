@@ -27,10 +27,10 @@ public class Session {
     @JoinColumn(name = "child_id", nullable = true)
     Child child;
 
-    @Column(name = "refresh_token", nullable = false)
+    @Column(name = "refresh_token", nullable = true)
     String refreshToken;
 
-    @Column(name = "access_token", nullable = false)
+    @Column(name = "access_token", nullable = true)
     String accessToken;
 
     @Column(name = "device_id", nullable = false)

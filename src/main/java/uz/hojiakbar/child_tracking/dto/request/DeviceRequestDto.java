@@ -7,19 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.hojiakbar.child_tracking.enums.Platform;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeviceRequestDto {
 
-    private String device_token;
-
-    private Platform platform;
-
-    private String device_model;
-
-    private String os_version;
-
-    private String app_version;
+    private UUID id;
+    private String platform;
+    private String deviceModel;
+    private String appVersion;
 }

@@ -37,7 +37,7 @@ public class Users {
     @Column(unique = true)
     String verification_code;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     List<Child> children = new ArrayList<>();
 
     LocalDateTime code_generated_at;

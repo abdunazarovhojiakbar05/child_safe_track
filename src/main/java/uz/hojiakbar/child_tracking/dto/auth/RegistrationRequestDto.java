@@ -29,11 +29,12 @@ public class RegistrationRequestDto {
     @Pattern(regexp = "^\\+998\\d{9}$", message = "Telefon raqami noto'g'ri. Masalan: +998901234567")
     private String phone;
 
+
+
     @Pattern(
             regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             message = "Parol kamida 8 ta belgi, 1 ta katta harf, 1 ta raqam va 1 ta maxsus belgidan iborat bo'lishi kerak"
     )
-
     @Column(nullable = false)
     @Size(min = 8, message = "Parol kamida 8 ta belgi bo'lishi kerak")
     private String password;
