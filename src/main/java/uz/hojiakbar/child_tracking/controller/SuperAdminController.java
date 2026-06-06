@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
+import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.List;
@@ -45,6 +46,14 @@ public class SuperAdminController {
     @GetMapping("/get_session")
     public ResponseEntity<List<Session>> getAllSession() {
        return ResponseEntity.ok(service.getAllSession());
+    }
+
+    private final SessionRepository sessionRepository;
+
+    @GetMapping("/fix-sessions")
+    public String fixDuplicateSessions() {
+        sessionRepository.deleteOldDuplicateSessions();
+        return "Duplicate sessionlar tozalandi!";
     }
 
 

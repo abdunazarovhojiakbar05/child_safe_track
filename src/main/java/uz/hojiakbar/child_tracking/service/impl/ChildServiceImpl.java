@@ -17,7 +17,6 @@ import uz.hojiakbar.child_tracking.util.JwtUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -36,20 +35,20 @@ public class ChildServiceImpl implements ChildService {
 
         String email = request.getEmail();
 
-         Child child = childRepository.findByEmail(email);
+        Child child = childRepository.findByEmail(email);
         if (child == null) {
             throw new RuntimeException("Child topilmadi: " + email);
         }
 
-         Family_Relations relations = familyRelationsRepository
+        Family_Relations relations = familyRelationsRepository
                 .findByChildEmail(email)
                 .orElseThrow(() -> new RuntimeException("Family_Relations topilmadi: " + email));
 
-         if (relations.getParent() == null) {
+        if (relations.getParent() == null) {
             throw new RuntimeException("Parent bog'lanmagan! generateInviteCode da xato bor.");
         }
 
-         child.setPhone(request.getPhone());
+        child.setPhone(request.getPhone());
         child.setGender(request.getGender());
         child.setDate_of_birth(request.getDatedOfBirth());
         child.setVerified(Status.ACTIVE);
@@ -65,20 +64,25 @@ public class ChildServiceImpl implements ChildService {
         }
         childRepository.save(child);
 
-         String accessToken = jwtUtils.generateToken(child.getEmail());
+        String accessToken = jwtUtils.generateToken(child.getEmail());
         String refreshToken = jwtUtils.generateRefreshToken(child.getEmail());
 
-         Session session = Session.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .child(child)
-                .ipAddress("unknown")
-                .userAgent("unknown")
-                .deviceId(UUID.randomUUID())
-                .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(7))
-                .build();
-        sessionRepository.save(session);
+
+        Session session1 = sessionRepository.findSessionByChild_Email(request.getEmail());
+
+        if (session1 == null) {
+            session1 = new Session();
+        }
+        session1.setAccessToken(accessToken);
+        session1.setRefreshToken(refreshToken);
+        session1.setChild(child);
+        session1.setIpAddress("unknown");
+        session1.setUserAgent("unknown");
+        session1.setDeviceId(UUID.randomUUID());
+        session1.setCreatedAt(LocalDateTime.now());
+        session1.setExpiresAt(LocalDateTime.now().plusDays(7));
+
+        sessionRepository.save(session1);
 
         return RegisterResponseDto.builder()
                 .child_id(child.getId())

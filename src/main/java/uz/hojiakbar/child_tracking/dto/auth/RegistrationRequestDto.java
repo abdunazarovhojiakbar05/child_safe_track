@@ -40,6 +40,4 @@ public class RegistrationRequestDto {
     @Size(min = 8, message = "Parol kamida 8 ta belgi bo'lishi kerak")
     private String password;
 
-    @Valid
-    private DeviceRequestDto device;
 }

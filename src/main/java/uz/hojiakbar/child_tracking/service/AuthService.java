@@ -6,7 +6,7 @@ import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenRequestDto;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenResponseDto;
 
 public interface AuthService {
-    String login(SendOtpRequest requestDto);
+    SendOtpResponse login(SendOtpRequest requestDto);
 
     String registration(RegistrationRequestDto requestDto);
 

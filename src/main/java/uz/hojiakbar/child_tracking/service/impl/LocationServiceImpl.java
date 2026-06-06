@@ -1,6 +1,9 @@
 package uz.hojiakbar.child_tracking.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.hojiakbar.child_tracking.dto.request.LocationRequestDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
@@ -84,35 +87,40 @@ public class LocationServiceImpl implements LocationService {
     }
 
 
-    private void checkGeofence(Child child, double lat, double lng) {
-
+    @Override
+    public void checkGeofence(Child child, double lat, double lng) {
         List<Geofences> geofences = geofencesRepository.findActiveByChildId(child.getId());
 
         for (var geofence : geofences) {
             double distance = calculateDistance(lat, lng,
-                    geofence.getCenterLat().doubleValue()
-                    , geofence.getCenterLon().doubleValue()
-            );
+                    geofence.getCenterLat().doubleValue(),
+                    geofence.getCenterLon().doubleValue());
+
+            boolean insideNow = distance <= geofence.getRadiusMetres().doubleValue();
+            Boolean wasInside = geofence.getLastKnownInside();
 
 
-            boolean insideGeofence = distance <= geofence.getRadiusMetres().doubleValue();
+            if (wasInside == null || wasInside != insideNow) {
+                if (!insideNow && geofence.isNotifyOnExit()) {
+                    notificationService.sendNotification(
+                            geofence.getCreatedBy().getFcmToken(),
+                            "⚠️ Xavfsiz hudud",
+                            child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
+                    );
+                }
+                if (insideNow && geofence.isNotifyOnEnter()) {
+                    notificationService.sendNotification(
+                            geofence.getCreatedBy().getFcmToken(),
+                            "✅ Xavfsiz hudud",
+                            child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
+                    );
+                }
 
-            if (!insideGeofence && geofence.isNotifyOnExit()) {
-                 notificationService.sendNotification(
-                        geofence.getCreatedBy().getFcmToken(),
-                        "⚠️ Xavfsiz hudud",
-                        child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
-                );
+                geofence.setLastKnownInside(insideNow);
+                geofencesRepository.save(geofence);
             }
-            if (insideGeofence && geofence.isNotifyOnEnter()) {
-                 notificationService.sendNotification(
-                        geofence.getCreatedBy().getFcmToken(),
-                        "✅ Xavfsiz hudud",
-                        child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
-                );
-            }
+
         }
-
     }
 
     @Override
@@ -130,6 +138,16 @@ public class LocationServiceImpl implements LocationService {
                 .stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    @Override
+    public Page<LocationResponseDto> getRouteHistory(UUID childId, int page, int size) {
+        LocalDateTime fifteenDaysAgo = LocalDateTime.now().minusDays(15);
+        Pageable pageable = PageRequest.of(page, size);
+
+        return locationsRepository
+                .findByChildIdAndRecordedAtAfter(childId, fifteenDaysAgo, pageable)
+                .map(this::toDto);
     }
 
     private LocationResponseDto toDto(Locations loc) {

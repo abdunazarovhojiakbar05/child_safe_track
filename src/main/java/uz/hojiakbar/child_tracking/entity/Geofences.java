@@ -36,6 +36,8 @@ public class Geofences {
     @Column(nullable = false)
     String name;
 
+    Boolean lastKnownInside;
+
     BigDecimal centerLat;
 
     BigDecimal centerLon;

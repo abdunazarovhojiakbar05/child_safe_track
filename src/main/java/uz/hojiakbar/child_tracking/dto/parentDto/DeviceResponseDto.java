@@ -1,5 +1,6 @@
 package uz.hojiakbar.child_tracking.dto.parentDto;
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,6 @@ public class DeviceResponseDto {
 
     String model;
 
+    @JoinColumn(name = "os_version")
     String osVersion;
 }

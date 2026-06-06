@@ -81,4 +81,7 @@ public class GeofencesServiceImpl implements GeofencesService {
     public List<GeofenceResponseDto> getGeofencesByChildId(UUID childId) {
         return  geofencesRepository.findAllByChildId(childId).stream().map(this::toDto).toList();
     }
+
+
+
 }

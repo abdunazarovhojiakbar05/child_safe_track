@@ -11,7 +11,8 @@ import uz.hojiakbar.child_tracking.enums.OtpTarget;
 @NoArgsConstructor
 @Builder
 public class SendOtpRequest {
+
     private String email;
-    private DeviceRequestDto device;
+
     private OtpTarget target;
  }

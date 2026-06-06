@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final SessionRepository sessionRepository;
 
     @Override
-    public String login(SendOtpRequest requestDto) {
+    public SendOtpResponse login(SendOtpRequest requestDto) {
 
 
         switch (requestDto.getTarget()) {
@@ -61,15 +61,15 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
-    String getLoginWithSMS(SendOtpRequest requestDto) {
+    SendOtpResponse getLoginWithSMS(SendOtpRequest requestDto) {
         throw new RuntimeException("SMS login not supported yet");
     }
 
-    String getLoginWithTelegram(SendOtpRequest requestDto) {
+    SendOtpResponse getLoginWithTelegram(SendOtpRequest requestDto) {
         throw new RuntimeException("Telegram login not supported yet");
     }
 
-    String getLoginWithEmail(@MonotonicNonNull SendOtpRequest requestDto)   {
+    SendOtpResponse getLoginWithEmail(@MonotonicNonNull SendOtpRequest requestDto)   {
 
         String email = requestDto.getEmail();
 
@@ -95,7 +95,10 @@ public class AuthServiceImpl implements AuthService {
 
         sendEmail(user.getEmail(), code);
 
-        return session.getId() + " Session ID   " + code;
+        return SendOtpResponse.builder()
+                .sessionId(session.getId())
+                .code(code)
+                .build();
 
 
     }
@@ -128,17 +131,14 @@ public class AuthServiceImpl implements AuthService {
             usersRepository.save(user);
 
 
-            Session session = Session.builder()
-                    .user(user)
-                    .accessToken(token)
-                    .refreshToken(refreshToken)
-                    .ipAddress("unknown") //TODO Haqiqiy IP ni olish uchun HttpServletRequest kerak
-                    .userAgent("unknown")
-                    .deviceId(UUID.randomUUID()) //TODO Bu yerda foydalanuvchi device_id sini yuborishi kerak
-                    .createdAt(LocalDateTime.now())
-                    .expiresAt(LocalDateTime.now().plusDays(7))
-                    .revokedAt(null)
-                    .build();
+            Session session = sessionRepository.findSessionByUser_Email(user.getEmail());
+
+            session.setAccessToken(token);
+            session.setRefreshToken(refreshToken);
+            session.setCreatedAt(LocalDateTime.now());
+            session.setExpiresAt(LocalDateTime.now().plusDays(7));
+            session.setRevokedAt(null);
+
             sessionRepository.save(session);
 
 
@@ -168,15 +168,6 @@ public class AuthServiceImpl implements AuthService {
         usersRepository.save(user);
 
 
-        if (dto.getDevice() != null) {
-            Device device = new Device();
-            device.setId(dto.getDevice().getId());
-            device.setPlatform(Platform.valueOf(dto.getDevice().getPlatform()));
-            device.setDevice_model(dto.getDevice().getDeviceModel());
-            device.setApp_version(dto.getDevice().getAppVersion());
-            devicesRepository.save(device);
-
-        }
 
 
         Session session = Session.builder()

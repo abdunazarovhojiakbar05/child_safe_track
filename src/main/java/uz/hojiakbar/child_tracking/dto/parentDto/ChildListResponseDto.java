@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.dto.parentDto;
 
 
+import jakarta.persistence.JoinColumn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import uz.hojiakbar.child_tracking.enums.Status;
@@ -24,6 +25,8 @@ public class ChildListResponseDto {
     String avatar_url;
     Date date_of_birth;
     Status verified;
+
+    @JoinColumn(name = "is_active")
     boolean isActive;
     int age;
 }

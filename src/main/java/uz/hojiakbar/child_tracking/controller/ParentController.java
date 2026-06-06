@@ -52,10 +52,11 @@ public class ParentController {
     @GetMapping("/children")
     @Operation(summary = "Ota-onani bolalari ro'yxati")
     public ResponseEntity<List<ChildListResponseDto>> getChildren(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        ///   TODO BOLA INVITE KODNI OLGANDA STATUSNI OZGARTISHI VA  TEKSHIRISHI KERAK
         return ResponseEntity.ok(parentService.getChildrenByParentEmail(userDetails.getUsername()));
 
     }
+
+
 
     @GetMapping("/child/{childId}")
     @Operation(summary = "Ota-ona id orqali bolasini profilini korsihi || bola haqida toliq ma'lumot")

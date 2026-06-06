@@ -27,13 +27,13 @@ public class Session {
     @JoinColumn(name = "child_id", nullable = true)
     Child child;
 
-    @Column(name = "refresh_token", nullable = true)
+    @Column(name = "refresh_token", nullable = true, unique = true)
     String refreshToken;
 
-    @Column(name = "access_token", nullable = true)
+    @Column(name = "access_token", nullable = true, unique = true)
     String accessToken;
 
-    @Column(name = "device_id", nullable = false)
+    @Column(name = "device_id", nullable = false, unique = true)
     UUID deviceId;
 
     @Column(name = "ip_address", nullable = true)

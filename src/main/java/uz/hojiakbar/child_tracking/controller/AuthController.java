@@ -21,7 +21,7 @@ public class AuthController {
 
     @Operation(summary = "Ota-ona login send", description = "Ota-ona tizimga kirishi (kod olishi) uchun faqat email manzilini yuboradi.")
     @PostMapping("/send")
-    public ResponseEntity<String> send(@Valid @RequestBody SendOtpRequest requestDto) {
+    public ResponseEntity<SendOtpResponse> send(@Valid @RequestBody SendOtpRequest requestDto) {
         return ResponseEntity.ok(authService.login(requestDto));
      }
 
