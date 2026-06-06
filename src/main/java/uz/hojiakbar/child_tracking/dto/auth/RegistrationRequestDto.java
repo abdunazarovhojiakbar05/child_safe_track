@@ -16,6 +16,7 @@ import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
 @NoArgsConstructor
 @Builder
 public class RegistrationRequestDto {
+
     @NotBlank(message = "Ism bo'sh bo'lmasligi kerak")
     private String full_name;
 

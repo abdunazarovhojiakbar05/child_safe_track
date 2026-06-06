@@ -4,6 +4,8 @@ package uz.hojiakbar.child_tracking.dto.auth;
 import lombok.*;
 import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -11,7 +13,7 @@ import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
 @Builder
 public class VerifyOtpRequest {
 
-    private String email;
-    private String code;
+     private String code;
     private DeviceRequestDto device;
+    private UUID sessionID;
 }

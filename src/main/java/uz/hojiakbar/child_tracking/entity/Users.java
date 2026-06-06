@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import uz.hojiakbar.child_tracking.enums.Gender;
+import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.enums.UserRole;
 
 import java.time.LocalDateTime;
@@ -58,6 +59,8 @@ public class Users {
     String full_name;
 
     String avatar_url;
+
+    Status status;
 
 
     Date date_of_birth;

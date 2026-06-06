@@ -14,4 +14,8 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     @Transactional
     void deleteByRefreshToken(String refreshToken);
+
+    Session findSessionByUser_Email(String email);
+
+    Session findSessionById(UUID id);
 }

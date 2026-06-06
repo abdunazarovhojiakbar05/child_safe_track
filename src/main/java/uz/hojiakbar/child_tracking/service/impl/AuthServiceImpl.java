@@ -1,19 +1,22 @@
 package uz.hojiakbar.child_tracking.service.impl;
 
-import lombok.RequiredArgsConstructor;
+ import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.springframework.mail.SimpleMailMessage;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import uz.hojiakbar.child_tracking.dto.auth.*;
+ import org.springframework.web.server.ResponseStatusException;
+ import uz.hojiakbar.child_tracking.dto.auth.*;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenRequestDto;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenResponseDto;
 import uz.hojiakbar.child_tracking.entity.Device;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.enums.Platform;
+import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.DeviceRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
@@ -66,19 +69,22 @@ public class AuthServiceImpl implements AuthService {
         throw new RuntimeException("Telegram login not supported yet");
     }
 
-    String getLoginWithEmail(@MonotonicNonNull SendOtpRequest requestDto) {
+    String getLoginWithEmail(@MonotonicNonNull SendOtpRequest requestDto)   {
 
         String email = requestDto.getEmail();
 
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            throw new RuntimeException("Email formati noto'g'ri!");
+            throw new RuntimeException("Email not valid");
         }
 
         Users user = usersRepository.findByEmail(requestDto.getEmail());
 
+        Session  session = sessionRepository.findSessionByUser_Email(user.getEmail());
+
+/*
         if (user == null) {
-            throw new RuntimeException("Foydalanuvchi topilmadi!");
-        }
+            throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
+        }*/
 
 
         String code = String.valueOf((int) (Math.random() * 900000) + 100000);
@@ -89,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
 
         sendEmail(user.getEmail(), code);
 
-        return code + " kodingizni kiriting";
+        return session.getId() + " Session ID   " + code;
 
 
     }
@@ -97,15 +103,16 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDto verifyOtpCode(VerifyOtpRequest dto) {
         LocalDateTime now = LocalDateTime.now();
 
+        Session session1 = sessionRepository.findSessionById(dto.getSessionID());
 
-        Users user = usersRepository.findByEmail(dto.getEmail());
+        Users user =  session1.getUser();
 
         if (user == null) {
-            throw new RuntimeException("Foydalanuvchi topilmadi!");
+            throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
         }
 
         if (user.getCode_generated_at().plusMinutes(3).isBefore(now)) {
-            throw new RuntimeException("Kod yuborilmagan yoki eskirgan !");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kod yaroqsiz yoki muddati o'tgan!");
         }
 
 
@@ -185,7 +192,6 @@ public class AuthServiceImpl implements AuthService {
         return user.getFull_name() + " saqlandi!";
     }
 
-
     @Async
     public void sendEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -195,7 +201,6 @@ public class AuthServiceImpl implements AuthService {
         message.setText("Sizning bir martalik kodingiz: " + code);
         emailSender.send(message);
     }
-
 
     @Override
     public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto dto) {

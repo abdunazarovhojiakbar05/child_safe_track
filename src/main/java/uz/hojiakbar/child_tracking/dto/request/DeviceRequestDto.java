@@ -16,7 +16,10 @@ import java.util.UUID;
 public class DeviceRequestDto {
 
     private UUID id;
+
     private String platform;
+
     private String deviceModel;
+
     private String appVersion;
 }

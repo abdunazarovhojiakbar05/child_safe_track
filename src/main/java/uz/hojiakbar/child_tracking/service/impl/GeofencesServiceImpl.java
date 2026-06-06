@@ -75,6 +75,8 @@ public class GeofencesServiceImpl implements GeofencesService {
                 .notifyOnExit(g.isNotifyOnExit())
                 .build();
     }
+
+
     @Override
     public List<GeofenceResponseDto> getGeofencesByChildId(UUID childId) {
         return  geofencesRepository.findAllByChildId(childId).stream().map(this::toDto).toList();
