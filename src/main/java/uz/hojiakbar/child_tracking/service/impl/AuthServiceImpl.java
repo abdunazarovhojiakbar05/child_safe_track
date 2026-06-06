@@ -162,8 +162,7 @@ public class AuthServiceImpl implements AuthService {
         user.setFull_name(dto.getFull_name());
 
         user.setIsActive(false);
-        user.setPassword_hash(passwordEncoder.encode(dto.getPassword()));
-        user.setDate_of_birth(new Date());
+         user.setDate_of_birth(new Date());
 
         usersRepository.save(user);
 
