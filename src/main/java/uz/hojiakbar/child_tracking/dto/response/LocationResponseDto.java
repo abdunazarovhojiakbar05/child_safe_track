@@ -1,5 +1,6 @@
 package uz.hojiakbar.child_tracking.dto.response;
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,9 +23,13 @@ public class LocationResponseDto {
     Address address;
     Float speed;
     Float accuracy;
+    @JoinColumn(name = "battery_level")
     Integer batteryLevel;
+    @JoinColumn(name = "is_charging")
     Boolean isCharging;
+    @JoinColumn(name = "recorded_at")
     LocalDateTime recordedAt;
+    @JoinColumn(name = "created_at")
     LocalDateTime createdAt;
 
 }

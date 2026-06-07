@@ -6,10 +6,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uz.hojiakbar.child_tracking.dto.auth.*;
+ import uz.hojiakbar.child_tracking.dto.auth.*;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenRequestDto;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenResponseDto;
-import uz.hojiakbar.child_tracking.service.AuthService;
+ import uz.hojiakbar.child_tracking.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +34,7 @@ public class AuthController {
 
     @Operation(summary = "Ota-ona ro'yxatdan o'tishi", description = "Yangi ota-ona akkaunti yaratadi va qurilma (device) ma'lumotlarini tizimda saqlaydi.")
     @PostMapping("/registration")
-    public ResponseEntity<String> registration(@Valid @RequestBody RegistrationRequestDto requestDto) {
+    public ResponseEntity<SendOtpResponse> registration(@Valid @RequestBody RegistrationRequestDto requestDto) {
         return ResponseEntity.ok(authService.registration(requestDto));
     }
 
@@ -52,4 +52,6 @@ public class AuthController {
         authService.logout(token);
         return ResponseEntity.ok("Tizimdan muvaffaqiyatli chiqildi!");
     }
+
+
 }

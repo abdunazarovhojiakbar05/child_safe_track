@@ -1,6 +1,5 @@
 package uz.hojiakbar.child_tracking.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,19 +26,17 @@ public class ParentController {
     private final FamilyRelationsService relationService;
     private final UsersService usersService;
 
-
     @GetMapping
     @Operation(summary = "parent tomon uchun dashboard")
-    public ResponseEntity<ParentDashboardResponseDto> getParents(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ParentDashboardResponseDto> getParents(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // Email JWT tokendan olinadi — REQHeader kerak emas
         String email = userDetails.getUsername();
-        /// TODO  DASHBOARDNI YAKUNLASH KERAK  FAQAT DEFAULT MALUMOTLAR BOR
         return ResponseEntity.ok(parentService.getParentDashboard(email));
-
     }
 
-
     @PostMapping("/add-child")
-    @Operation(summary = "bolani qoshayotganda faqatgina ism va emaiul beriladi ")
+    @Operation(summary = "bolani qoshayotganda faqatgina ism va email beriladi")
     public ResponseEntity<String> addChild(
             @RequestBody ChildRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -48,31 +45,26 @@ public class ParentController {
         return ResponseEntity.ok(token);
     }
 
-
     @GetMapping("/children")
     @Operation(summary = "Ota-onani bolalari ro'yxati")
-    public ResponseEntity<List<ChildListResponseDto>> getChildren(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<ChildListResponseDto>> getChildren(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.getChildrenByParentEmail(userDetails.getUsername()));
-
     }
 
-
-
     @GetMapping("/child/{childId}")
-    @Operation(summary = "Ota-ona id orqali bolasini profilini korsihi || bola haqida toliq ma'lumot")
-     public ResponseEntity<ChildDashboardResponseDto> getChildById(@PathVariable UUID childId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    @Operation(summary = "Ota-ona id orqali bolasini profilini korishi || bola haqida to'liq ma'lumot")
+    public ResponseEntity<ChildDashboardResponseDto> getChildById(
+            @PathVariable UUID childId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.getChildById(childId, userDetails));
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////////////
-
-    ///     GEOFENCES
-
     @PutMapping("/fcm-token")
+    @Operation(summary = "FCM token yangilash")
     public ResponseEntity<String> updateFcmToken(
             @RequestParam String fcmToken,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-
         Users parent = userDetails.getUsers();
         if (parent == null) {
             throw new RuntimeException("Faqat parent FCM token saqlashi mumkin!");
@@ -81,8 +73,4 @@ public class ParentController {
         usersService.save(parent);
         return ResponseEntity.ok("FCM token saqlandi");
     }
-
-
-
-
 }

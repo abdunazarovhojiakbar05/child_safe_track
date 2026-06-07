@@ -10,5 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, UUID> {
-//    Device findByChildId(UUID childId);
+    Device findDeviceById(UUID id);
+
+
 }

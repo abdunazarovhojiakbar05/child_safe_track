@@ -3,11 +3,13 @@ package uz.hojiakbar.child_tracking.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.hojiakbar.child_tracking.config.GlobalVar;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterChildRequestDto;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Family_Relations;
 import uz.hojiakbar.child_tracking.entity.Session;
+import uz.hojiakbar.child_tracking.enums.Platform;
 import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
@@ -54,7 +56,6 @@ public class ChildServiceImpl implements ChildService {
         child.setVerified(Status.ACTIVE);
         child.setIsActive(true);
 
-
         if (child.getParents() == null) {
             child.setParents(new ArrayList<>());
         }
@@ -64,25 +65,30 @@ public class ChildServiceImpl implements ChildService {
         }
         childRepository.save(child);
 
-        String accessToken = jwtUtils.generateToken(child.getEmail());
+        String accessToken  = jwtUtils.generateToken(child.getEmail());
         String refreshToken = jwtUtils.generateRefreshToken(child.getEmail());
 
-
-        Session session1 = sessionRepository.findSessionByChild_Email(request.getEmail());
-
-        if (session1 == null) {
-            session1 = new Session();
+        Session session = sessionRepository.findSessionByChild_Email(request.getEmail());
+        if (session == null) {
+            session = new Session();
         }
-        session1.setAccessToken(accessToken);
-        session1.setRefreshToken(refreshToken);
-        session1.setChild(child);
-        session1.setIpAddress("unknown");
-        session1.setUserAgent("unknown");
-        session1.setDeviceId(UUID.randomUUID());
-        session1.setCreatedAt(LocalDateTime.now());
-        session1.setExpiresAt(LocalDateTime.now().plusDays(7));
 
-        sessionRepository.save(session1);
+        Platform platform = Platform.valueOf(GlobalVar.getPlatform());
+
+         String rawDeviceId = GlobalVar.getDeviceId();
+        session.setDeviceId(rawDeviceId != null && !rawDeviceId.isBlank()
+                ? UUID.fromString(rawDeviceId)
+                : UUID.randomUUID());
+        session.setIpAddress(GlobalVar.getDeviceName());
+        session.setPlatform(platform);
+        session.setAppVersion(GlobalVar.getAppVersion());
+        session.setAccessToken(accessToken);
+        session.setRefreshToken(refreshToken);
+        session.setChild(child);
+        session.setCreatedAt(LocalDateTime.now());
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+
+        sessionRepository.save(session);
 
         return RegisterResponseDto.builder()
                 .child_id(child.getId())

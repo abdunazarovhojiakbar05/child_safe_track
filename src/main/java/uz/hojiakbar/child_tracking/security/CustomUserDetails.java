@@ -82,17 +82,17 @@ public class CustomUserDetails implements UserDetails {
         // invite holatida phone null, email ishlatamiz
         return (child.getPhone() != null) ? child.getPhone() : child.getEmail();
     }
-    @Override
-    public String getPassword() {
-        return isParent()
-                ? (users.getPassword_hash() != null ? users.getPassword_hash() : "")
-                : null;
-    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = isParent() ? users.getRole().name() : UserRole.CHILD.name();
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
     }
 
     @Override

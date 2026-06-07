@@ -8,7 +8,7 @@ import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenResponseDto;
 public interface AuthService {
     SendOtpResponse login(SendOtpRequest requestDto);
 
-    String registration(RegistrationRequestDto requestDto);
+    SendOtpResponse registration(RegistrationRequestDto requestDto);
 
     RefreshTokenResponseDto refreshToken(@Valid RefreshTokenRequestDto dto);
 

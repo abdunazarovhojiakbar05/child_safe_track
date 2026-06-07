@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,9 +22,16 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id ;
 
-    UUID childID;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private Users user;
 
-    UUID userID;
+    @ManyToOne
+    @JoinColumn(name = "child_id")
+    @JsonIgnore
+    private Child child;
+
 
     @Column(nullable = true)
     String device_name;
@@ -35,7 +43,7 @@ public class Device {
     @Enumerated(EnumType.STRING)
     Platform platform;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String device_model;
 
     @Column(nullable = true)

@@ -1,8 +1,10 @@
 package uz.hojiakbar.child_tracking.controller;
 
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
@@ -19,6 +21,7 @@ import java.util.UUID;
 public class SuperAdminController {
 
     private final SuperAdminService service;
+    private final EntityManager entityManager;
 
     @GetMapping("/get_parent")
     public ResponseEntity<List<Users>> getAllPArent() {
@@ -54,6 +57,13 @@ public class SuperAdminController {
     public String fixDuplicateSessions() {
         sessionRepository.deleteOldDuplicateSessions();
         return "Duplicate sessionlar tozalandi!";
+    }
+
+    @Transactional
+    @GetMapping("/drop-password-column")
+    public ResponseEntity<String> dropPasswordColumn() {
+        entityManager.createNativeQuery("ALTER TABLE users DROP COLUMN password_hash").executeUpdate();
+        return ResponseEntity.ok("password_hash column o'chirildi!");
     }
 
 

@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
+import uz.hojiakbar.child_tracking.enums.OtpTarget;
+import uz.hojiakbar.child_tracking.enums.Role;
 
 @Getter
 @Setter
@@ -29,6 +31,8 @@ public class RegistrationRequestDto {
     @NotBlank(message = "Telefon raqami majburiy")
     @Pattern(regexp = "^\\+998\\d{9}$", message = "Telefon raqami noto'g'ri. Masalan: +998901234567")
     private String phone;
+
+    private OtpTarget target;
 
 
 }

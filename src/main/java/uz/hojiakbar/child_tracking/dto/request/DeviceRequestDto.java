@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.dto.request;
 
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,9 @@ public class DeviceRequestDto {
 
     private String platform;
 
+    @JoinColumn(name = "device_model")
     private String deviceModel;
 
+    @JoinColumn(name = "app_version")
     private String appVersion;
 }

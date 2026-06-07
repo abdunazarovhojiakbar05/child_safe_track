@@ -6,9 +6,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import uz.hojiakbar.child_tracking.enums.Gender;
 import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.enums.UserRole;
@@ -52,8 +49,6 @@ public class Users {
     @Column(unique = true)
     String phone;
 
-    @Column(unique = true, nullable = false)
-    String password_hash;
 
     @Column(nullable = false)
     String full_name;
@@ -77,6 +72,7 @@ public class Users {
     @UpdateTimestamp
     LocalDateTime updated_at;
 
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Device> devices = new ArrayList<>();
 
 }
