@@ -19,6 +19,7 @@ import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.enums.Platform;
 import uz.hojiakbar.child_tracking.enums.UserRole;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
+import uz.hojiakbar.child_tracking.exception.ValidationException;
 import uz.hojiakbar.child_tracking.repository.DeviceRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
@@ -30,6 +31,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -92,25 +94,37 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
         }
 
-        Session session = sessionRepository.findSessionByUser_Email(user.getEmail());
-
-
-        if (session == null) {
-            Session session1 = new Session();
-            session1.setDeviceId(UUID.fromString(GlobalVar.getDeviceId()));
-            session1.setCreatedAt(LocalDateTime.now());
-            session1.setExpiresAt(LocalDateTime.now().plusDays(7));
-            session1.setIpAddress(GlobalVar.getDeviceName());
-            session1.setPlatform(Platform.valueOf(GlobalVar.getPlatform()));
-            session1.setAppVersion(GlobalVar.getAppVersion());
-            session1.setRevokedAt(null);
-            session1.setUser(user);
-            sessionRepository.save(session1);
-            session = session1;
+        String rawDeviceIdStr = GlobalVar.getDeviceId();
+        if (rawDeviceIdStr == null || rawDeviceIdStr.isBlank()) {
+            throw new ValidationException("X-Device-ID header majburiy!");
         }
+        UUID deviceID = UUID.fromString(rawDeviceIdStr);
 
-        Platform platform = Platform.valueOf(GlobalVar.getPlatform());
-        UUID deviceID = UUID.fromString(GlobalVar.getDeviceId());
+
+        String rawPlatformStr = GlobalVar.getPlatform();
+        if (rawPlatformStr == null || rawPlatformStr.isBlank()) {
+            throw new ValidationException("X-Platform header majburiy!");
+        }
+        Platform platform = Platform.valueOf(rawPlatformStr);
+
+
+
+       Optional< Session > optional = Optional.ofNullable(sessionRepository.findSessionByDeviceId(deviceID  ));
+        Session session2 = optional.orElseGet(() -> {
+                Session session = new Session();
+            session.setDeviceId(deviceID);
+            session.setUser(user);
+            session.setCreatedAt(LocalDateTime.now());
+            session.setExpiresAt(LocalDateTime.now().plusDays(7));
+            session.setIpAddress(GlobalVar.getDeviceName());
+            session.setPlatform(platform);
+            session.setAppVersion(GlobalVar.getAppVersion());
+            session.setRevokedAt(null);
+            sessionRepository.save(session);
+
+            return session;
+        } );
+
         Device device = deviceRepository.findById(deviceID).orElse(new Device());
 
         device.setUser(user);
@@ -124,8 +138,6 @@ public class AuthServiceImpl implements AuthService {
 //            session.setDeviceId(UUID.fromString(GlobalVar.getDeviceId()));
 //            sessionRepository.save(session);
 //        }
-        System.out.println("device Id  :  " + session.getDeviceId().toString());
-
 
         String code = String.valueOf((int) (Math.random() * 900000) + 100000);
 
@@ -133,10 +145,15 @@ public class AuthServiceImpl implements AuthService {
         user.setCode_generated_at(LocalDateTime.now());
         usersRepository.save(user);
 
+        session2.setAppVersion(GlobalVar.getAppVersion());
+        session2.setPlatform(platform);
+        sessionRepository.save(session2);
+
+
         sendEmail(user.getEmail(), code);
 
         return SendOtpResponse.builder()
-                .session_id(session.getId())
+                .session_id(session2.getId())
                 .code(code)
                 .build();
 
@@ -172,18 +189,18 @@ public class AuthServiceImpl implements AuthService {
 
             long expires_in = (expirationDate != null) ? (expirationDate.getTime() - System.currentTimeMillis()) / 1000 : 86400;
 
+            session1.setAccessToken(token);
+            session1.setRefreshToken(refreshToken);
+            session1.setCreatedAt(LocalDateTime.now());
+            session1.setExpiresAt(LocalDateTime.now().plusDays(7));
+            session1.setRevokedAt(null);
+
+            sessionRepository.save(session1);
+
+
+            user.setVerification_code(null);
+            user.setCode_generated_at(null);
             usersRepository.save(user);
-
-
-            Session session = sessionRepository.findSessionByUser_Email(user.getEmail());
-
-            session.setAccessToken(token);
-            session.setRefreshToken(refreshToken);
-            session.setCreatedAt(LocalDateTime.now());
-            session.setExpiresAt(LocalDateTime.now().plusDays(7));
-            session.setRevokedAt(null);
-
-            sessionRepository.save(session);
 
 
             return new LoginResponseDto(user, token, refreshToken, expires_in);
@@ -207,23 +224,13 @@ public class AuthServiceImpl implements AuthService {
         user.setPhone(dto.getPhone());
         user.setFull_name(dto.getFull_name());
         user.setRole(UserRole.PARENT);
-        user.setIsActive(false);
-        user.setDate_of_birth(new Date());
+        user.setIsActive(true);
+        user.setDate_of_birth(null);
 
         usersRepository.save(user);
 
-        UUID deviceID = UUID.fromString(GlobalVar.getDeviceId());
 
-        Session session = Session.builder()
-                .user(user)
-                .deviceName(GlobalVar.getDeviceName())
-                .platform(Platform.valueOf(GlobalVar.getPlatform()))
-                .appVersion(GlobalVar.getAppVersion())
-                .deviceId(deviceID)
-                .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(7))
-                .build();
-        sessionRepository.save(session);
+
 
         return getLoginWithEmail(dto.getEmail());
     }
@@ -240,7 +247,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto dto) {
-        String refreshToken = dto.getRefreshToken();
+        String refreshToken = dto.getRefresh_token();
         if (refreshToken == null || !jwtUtils.validateToken(refreshToken)) {
             throw new RuntimeException("Refresh token yaroqsiz yoki muddati o'tgan!");
         }
@@ -261,8 +268,7 @@ public class AuthServiceImpl implements AuthService {
             session.setRefreshToken(newRefreshToken);
             session.setCreatedAt(LocalDateTime.now());
             session.setExpiresAt(LocalDateTime.now().plusDays(7));
-            session.setRevokedAt(LocalDateTime.now());
-
+            session.setRevokedAt(null);
             sessionRepository.save(session);
         });
 

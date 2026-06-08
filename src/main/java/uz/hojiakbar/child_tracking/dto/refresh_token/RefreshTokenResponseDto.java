@@ -18,5 +18,6 @@ public class RefreshTokenResponseDto {
 
     @JoinColumn(name = "access_token")
     private String access_token;
+
     private Long expires_in = 900L;
 }

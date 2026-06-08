@@ -40,4 +40,6 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 void deleteOldDuplicateSessions();
 
     Session findSessionByChild_Email(@NotBlank @Email String email);
+
+   Session findSessionByDeviceId(UUID deviceId);
 }

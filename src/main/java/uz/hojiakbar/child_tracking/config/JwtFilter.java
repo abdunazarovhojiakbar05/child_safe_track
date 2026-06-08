@@ -41,6 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
         GlobalVar.setDeviceName(deviceName);
         GlobalVar.setPlatform(platform);
 
+
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
@@ -87,4 +89,6 @@ public class JwtFilter extends OncePerRequestFilter {
             GlobalVar.setAppVersion(null);
         }
     }
+
+
 }

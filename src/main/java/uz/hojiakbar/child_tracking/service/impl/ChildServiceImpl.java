@@ -12,6 +12,7 @@ import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.enums.Platform;
 import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
+import uz.hojiakbar.child_tracking.exception.ValidationException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
@@ -74,12 +75,21 @@ public class ChildServiceImpl implements ChildService {
             session = new Session();
         }
 
-        Platform platform = Platform.valueOf(GlobalVar.getPlatform());
 
-         String rawDeviceId = GlobalVar.getDeviceId();
-        session.setDeviceId(rawDeviceId != null && !rawDeviceId.isBlank()
-                ? UUID.fromString(rawDeviceId)
-                : UUID.randomUUID());
+        String rawDeviceIdStr = GlobalVar.getDeviceId();
+        if (rawDeviceIdStr == null || rawDeviceIdStr.isBlank()) {
+            throw new ValidationException("X-Device-ID header majburiy!");
+        }
+        UUID deviceID = UUID.fromString(rawDeviceIdStr);
+
+        String rawPlatformStr = GlobalVar.getPlatform();
+        if (rawPlatformStr == null || rawPlatformStr.isBlank()) {
+            throw new ValidationException("X-Platform header majburiy!");
+        }
+        Platform platform = Platform.valueOf(rawPlatformStr);
+
+
+        session.setDeviceId(deviceID);
         session.setIpAddress(GlobalVar.getDeviceName());
         session.setPlatform(platform);
         session.setAppVersion(GlobalVar.getAppVersion());
@@ -87,6 +97,7 @@ public class ChildServiceImpl implements ChildService {
         session.setRefreshToken(refreshToken);
         session.setChild(child);
         session.setCreatedAt(LocalDateTime.now());
+        session.setRevokedAt(null);
         session.setExpiresAt(LocalDateTime.now().plusDays(7));
 
         sessionRepository.save(session);

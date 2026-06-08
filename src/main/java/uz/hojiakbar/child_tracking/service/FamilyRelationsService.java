@@ -10,6 +10,6 @@ import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 
 public interface FamilyRelationsService {
 
-    String generateInviteCode(ChildRequestDto dto, String email);
+    String addChild(ChildRequestDto dto, String email);
 
  }

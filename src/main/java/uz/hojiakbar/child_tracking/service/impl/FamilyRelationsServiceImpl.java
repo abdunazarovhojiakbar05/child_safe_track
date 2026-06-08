@@ -25,7 +25,7 @@ public class FamilyRelationsServiceImpl implements FamilyRelationsService {
 
 
     @Override
-    public String generateInviteCode(ChildRequestDto dto, String parentEmail) {
+    public String addChild(ChildRequestDto dto, String parentEmail) {
 
         Child existingChild = childRepository.findByEmail(dto.getEmail());
         if (existingChild != null) {

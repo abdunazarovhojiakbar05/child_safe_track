@@ -40,7 +40,7 @@ public class ParentController {
             @RequestBody ChildRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String parentEmail = userDetails.getUsername();
-        String token = relationService.generateInviteCode(requestDto, parentEmail);
+        String token = relationService.addChild(requestDto, parentEmail);
         return ResponseEntity.ok(token);
     }
 
