@@ -13,8 +13,10 @@ public class SummaryResponseDto {
 
     @JoinColumn(name = "active_children")
     private int activeChildren;
+
     @JoinColumn(name = "total_alerts_today")
-    private int totalAlertsToday;
+    private int totalAlertsToday
+            ;
     @JoinColumn(name = "unread_alerts")
     private int unreadAlerts;
 }

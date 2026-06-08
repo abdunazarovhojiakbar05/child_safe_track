@@ -66,13 +66,13 @@ public class GeofencesServiceImpl implements GeofencesService {
         return GeofenceResponseDto.builder()
                 .id(g.getId())
                 .name(g.getName())
-                .centerLat(g.getCenterLat().doubleValue())
-                .centerLon(g.getCenterLon().doubleValue())
-                .radiusMetres(g.getRadiusMetres().doubleValue())
+                .center_lat(g.getCenterLat().doubleValue())
+                .center_lon(g.getCenterLon().doubleValue())
+                .radius_metres(g.getRadiusMetres().doubleValue())
                 .type(g.getType())
-                .isActive(g.isActive())
-                .notifyOnEnter(g.isNotifyOnEnter())
-                .notifyOnExit(g.isNotifyOnExit())
+                .is_active(g.isActive())
+                .notify_on_enter(g.isNotifyOnEnter())
+                .notify_on_exit(g.isNotifyOnExit())
                 .build();
     }
 

@@ -19,7 +19,9 @@ import java.util.List;
 public class ParentDashboardResponseDto {
 
     private SummaryResponseDto summary;
+
     private List<ChildDashboardDto> children;
+
     private List<GeofenceResponseDto> geofences;
 
     @JoinColumn(name = "daily_activity_summary")

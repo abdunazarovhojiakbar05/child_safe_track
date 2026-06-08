@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -93,14 +94,15 @@ public class LocationServiceImpl implements LocationService {
     public void checkGeofence(Child child, double lat, double lng) {
         List<Geofences> geofences = geofencesRepository.findActiveByChildId(child.getId());
 
-        for (var geofence : geofences) {
+        List<Geofences> toUpdate = new ArrayList<>();
+
+        for (Geofences geofence : geofences) {
             double distance = calculateDistance(lat, lng,
                     geofence.getCenterLat().doubleValue(),
                     geofence.getCenterLon().doubleValue());
 
             boolean insideNow = distance <= geofence.getRadiusMetres().doubleValue();
             Boolean wasInside = geofence.getLastKnownInside();
-
 
             if (wasInside == null || wasInside != insideNow) {
                 if (!insideNow && geofence.isNotifyOnExit()) {
@@ -117,11 +119,13 @@ public class LocationServiceImpl implements LocationService {
                             child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
                     );
                 }
-
                 geofence.setLastKnownInside(insideNow);
-                geofencesRepository.save(geofence);
+                toUpdate.add(geofence);
             }
+        }
 
+        if (!toUpdate.isEmpty()) {
+            geofencesRepository.saveAll(toUpdate);
         }
     }
 
@@ -158,10 +162,10 @@ public class LocationServiceImpl implements LocationService {
         dto.setLongitude(loc.getLongitude());
         dto.setSpeed(loc.getSpeed());
         dto.setAccuracy(loc.getAccuracy());
-        dto.setBatteryLevel(loc.getBattery_level());
-        dto.setIsCharging(loc.isCharging());
-        dto.setRecordedAt(loc.getRecorded_at());
-        dto.setCreatedAt(loc.getCreated_at());
+        dto.setBattery_level(loc.getBattery_level());
+        dto.setIs_charging(loc.isCharging());
+        dto.setRecorded_at(loc.getRecorded_at());
+        dto.setCreated_at(loc.getCreated_at());
         dto.setAddress(null); ///TODO keyinroq reverse geocoding
         return dto;
     }

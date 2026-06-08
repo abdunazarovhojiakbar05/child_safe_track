@@ -88,7 +88,7 @@ public class UsersServiceImpl implements UsersService {
         location.setAddress(address);
         location.setLatitude(BigDecimal.valueOf(234.3456));
         location.setLongitude(BigDecimal.valueOf(345.3456));
-        location.setCreatedAt(LocalDateTime.now());
+        location.setCreated_at(LocalDateTime.now());
 
 
 /// --------------------------------------------------
@@ -101,8 +101,8 @@ public class UsersServiceImpl implements UsersService {
 
         ActivitySummaryResponseDto activitySummary = new ActivitySummaryResponseDto();
         activitySummary.setDistance(2345D);
-        activitySummary.setPlacesVisited(2342D);
-        activitySummary.setScreenTimeMin(341);
+        activitySummary.setPlaces_visited(2342D);
+        activitySummary.setScreen_time_min(341);
 
 ///-----------------------------------------------------------------------
 
@@ -145,10 +145,10 @@ public class UsersServiceImpl implements UsersService {
         dto.setLongitude(loc.getLongitude());
         dto.setSpeed(loc.getSpeed());
         dto.setAccuracy(loc.getAccuracy());
-        dto.setBatteryLevel(loc.getBattery_level());
-        dto.setIsCharging(loc.isCharging());
-        dto.setRecordedAt(loc.getRecorded_at());
-        dto.setCreatedAt(loc.getCreated_at());
+        dto.setBattery_level(loc.getBattery_level());
+        dto.setIs_charging(loc.isCharging());
+        dto.setRecorded_at(loc.getRecorded_at());
+        dto.setCreated_at(loc.getCreated_at());
         dto.setAddress(null);
         return dto;
     }

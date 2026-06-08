@@ -1,7 +1,5 @@
 package uz.hojiakbar.child_tracking.service;
 
-import org.springframework.http.ResponseEntity;
-import uz.hojiakbar.child_tracking.dto.childDto.ChildResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;

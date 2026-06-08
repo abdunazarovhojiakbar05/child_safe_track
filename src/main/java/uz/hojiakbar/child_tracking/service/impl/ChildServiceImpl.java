@@ -104,8 +104,8 @@ public class ChildServiceImpl implements ChildService {
 
         return RegisterResponseDto.builder()
                 .child_id(child.getId())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .access_token(accessToken)
+                .refresh_token(refreshToken)
                 .parent_id(relations.getParent().getId())
                 .build();
     }

@@ -23,18 +23,6 @@ import uz.hojiakbar.child_tracking.service.impl.UserDetailsServiceImpl;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final UserDetailsServiceImpl userDetailsService;
-    private final PasswordEncoder passwordEncoder;
-
-
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return new ProviderManager(provider);
-    }
-
 
 
     @Bean
@@ -51,15 +39,12 @@ public class SecurityConfig {
                                 "/swagger-resources/**", "/webjars/**"
                         ).permitAll()
 
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/v1/parent/add-child",
-                                "/api/v1/child/register"
-                        ).permitAll()
-                        .requestMatchers("/api/v1/parent/fcm-token").hasRole("PARENT")
-                        .requestMatchers("/api/v1/location/send").hasRole("CHILD")   // faqat child
-                        .requestMatchers("/api/v1/location/**").hasRole("PARENT")    // faqat parent
-                        .requestMatchers("/api/v1/parent/**").hasRole("PARENT")// ← o'zgartiring
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/child/register").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/parent/**").hasRole("PARENT")
+                        .requestMatchers("/api/v1/location/send").hasRole("CHILD")
+                        .requestMatchers("/api/v1/location/**").hasRole("PARENT")
                         .requestMatchers("/api/v1/geofences/**").hasRole("PARENT")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

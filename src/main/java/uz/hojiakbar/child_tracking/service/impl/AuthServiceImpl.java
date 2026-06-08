@@ -30,7 +30,6 @@ import uz.hojiakbar.child_tracking.util.JwtUtils;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,7 +68,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-
     SendOtpResponse getLoginWithSMS(String email) {
         throw new RuntimeException("SMS login not supported yet");
     }
@@ -77,7 +75,6 @@ public class AuthServiceImpl implements AuthService {
     SendOtpResponse getLoginWithTelegram(String email) {
         throw new RuntimeException("Telegram login not supported yet");
     }
-
 
 
     @Transactional
@@ -108,22 +105,21 @@ public class AuthServiceImpl implements AuthService {
         Platform platform = Platform.valueOf(rawPlatformStr);
 
 
-
-       Optional< Session > optional = Optional.ofNullable(sessionRepository.findSessionByDeviceId(deviceID  ));
+        Optional<Session> optional = Optional.ofNullable(sessionRepository.findSessionByDeviceId(deviceID));
         Session session2 = optional.orElseGet(() -> {
-                Session session = new Session();
+            Session session = new Session();
             session.setDeviceId(deviceID);
             session.setUser(user);
             session.setCreatedAt(LocalDateTime.now());
             session.setExpiresAt(LocalDateTime.now().plusDays(7));
-            session.setIpAddress(GlobalVar.getDeviceName());
+            session.setDeviceName(GlobalVar.getDeviceName());
             session.setPlatform(platform);
             session.setAppVersion(GlobalVar.getAppVersion());
             session.setRevokedAt(null);
             sessionRepository.save(session);
 
             return session;
-        } );
+        });
 
         Device device = deviceRepository.findById(deviceID).orElse(new Device());
 
@@ -203,7 +199,20 @@ public class AuthServiceImpl implements AuthService {
             usersRepository.save(user);
 
 
-            return new LoginResponseDto(user, token, refreshToken, expires_in);
+            return new LoginResponseDto(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getFull_name(),
+                    user.getAvatar_url(),
+                    user.getPhone(),
+                    user.getFcmToken(),
+                    user.getStatus(),
+                    user.getIsActive(),
+                    user.getDate_of_birth(),
+                    token,
+                    refreshToken,
+                    expires_in);
         } else {
             throw new RuntimeException("Kod xato!");
         }
@@ -228,8 +237,6 @@ public class AuthServiceImpl implements AuthService {
         user.setDate_of_birth(null);
 
         usersRepository.save(user);
-
-
 
 
         return getLoginWithEmail(dto.getEmail());
@@ -285,20 +292,20 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Token mavjud emas");
         }
 
-         if (token.startsWith("Bearer ")) {
+        if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
 
         Session session = sessionRepository.findByAccessToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Session topilmadi"));
 
-         session.setAccessToken(null);
+        session.setAccessToken(null);
         session.setRefreshToken(null);
         session.setRevokedAt(LocalDateTime.now());
         sessionRepository.save(session);
 
 
-         Device device = deviceRepository.findById(session.getDeviceId())
+        Device device = deviceRepository.findById(session.getDeviceId())
                 .orElse(null);
         if (device != null) {
             device.setActive(false);

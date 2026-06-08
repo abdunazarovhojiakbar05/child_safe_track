@@ -18,18 +18,27 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @FieldDefaults( level = lombok.AccessLevel.PRIVATE)
 public class LocationResponseDto {
+
     BigDecimal latitude;
+
     BigDecimal longitude;
+
     Address address;
+
     Float speed;
+
     Float accuracy;
+
     @JoinColumn(name = "battery_level")
-    Integer batteryLevel;
+    Integer battery_level;
+
     @JoinColumn(name = "is_charging")
-    Boolean isCharging;
+    Boolean is_charging;
+
     @JoinColumn(name = "recorded_at")
-    LocalDateTime recordedAt;
+    LocalDateTime recorded_at;
+
     @JoinColumn(name = "created_at")
-    LocalDateTime createdAt;
+    LocalDateTime created_at;
 
 }

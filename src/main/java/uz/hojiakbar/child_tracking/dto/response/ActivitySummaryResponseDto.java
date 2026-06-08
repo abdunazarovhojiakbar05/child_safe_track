@@ -16,9 +16,10 @@ public class ActivitySummaryResponseDto {
     Double distance ;
 
     @JoinColumn(name = "places_visited")
-    Double placesVisited;
+    Double places_visited;
+
     @JoinColumn(name = "screen_time_min")
-    int screenTimeMin;
+    int screen_time_min;
 
 
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.JoinColumn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import uz.hojiakbar.child_tracking.entity.Child;
 import java.util.UUID;
 
 @Getter
@@ -20,9 +19,9 @@ public class RegisterResponseDto {
     UUID parent_id;
 
     @JoinColumn(name = "access_token")
-    String accessToken;
+    String access_token;
 
     @JoinColumn(name = "refresh_token")
-    String refreshToken;
+    String refresh_token;
 
 }

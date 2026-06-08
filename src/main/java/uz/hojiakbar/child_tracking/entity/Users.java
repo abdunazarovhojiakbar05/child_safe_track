@@ -35,8 +35,12 @@ public class Users {
 
     String verification_code;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     List<Child> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Device> devices = new ArrayList<>();
+
 
     LocalDateTime code_generated_at;
 
@@ -72,7 +76,5 @@ public class Users {
     @UpdateTimestamp
     LocalDateTime updated_at;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Device> devices = new ArrayList<>();
 
 }
