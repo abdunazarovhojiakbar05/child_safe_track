@@ -30,7 +30,6 @@ public class ParentController {
     @Operation(summary = "parent tomon uchun dashboard")
     public ResponseEntity<ParentDashboardResponseDto> getParents(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        // Email JWT tokendan olinadi — REQHeader kerak emas
         String email = userDetails.getUsername();
         return ResponseEntity.ok(parentService.getParentDashboard(email));
     }

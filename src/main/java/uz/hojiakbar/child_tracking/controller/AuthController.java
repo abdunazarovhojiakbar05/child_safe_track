@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
  import uz.hojiakbar.child_tracking.dto.auth.*;
@@ -46,12 +47,17 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Tizimdan chiqish", description = "Foydalanuvchining faol tokenini bekor qiladi va tizimdan chiqaradi.")
+    @Operation(summary = "Tizimdan chiqish", description = "Foydalanuvchining faol tokenini bekor qiladi.")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestParam String token) {
+    public ResponseEntity<String> logout(
+            @RequestHeader("Authorization") String authHeader) throws BadRequestException {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new BadRequestException("Token mavjud emas");
+        }
+
+        String token = authHeader.substring(7);
         authService.logout(token);
         return ResponseEntity.ok("Tizimdan muvaffaqiyatli chiqildi!");
     }
-
-
 }

@@ -32,7 +32,7 @@ public class Users {
     @Column(name = "fcm_token")
     String fcmToken;
 
-    @Column(unique = true)
+
     String verification_code;
 
     @ManyToMany(fetch = FetchType.EAGER)

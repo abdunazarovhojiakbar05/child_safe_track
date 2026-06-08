@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.service.impl.UserDetailsServiceImpl;
 import uz.hojiakbar.child_tracking.util.JwtUtils;
 
@@ -22,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SessionRepository sessionRepository;
 
     @Override
     public void doFilterInternal(HttpServletRequest request,
@@ -45,6 +47,22 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUsernameFromToken(token);
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     if (jwtUtils.validateToken(token)) {
+
+                         boolean isRevoked = sessionRepository
+                                .findByAccessToken(token)
+                                .map(session -> session.getRevokedAt() != null)
+                                .orElse(true);
+
+                        if (isRevoked) {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"status\":401,\"message\":\"Token bekor qilingan, qayta login qiling\"}"
+                            );
+                            return;
+                        }
+
+
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(
@@ -60,7 +78,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 e.printStackTrace();
             }
         }
-
         try {
             filterChain.doFilter(request, response);
         } finally {

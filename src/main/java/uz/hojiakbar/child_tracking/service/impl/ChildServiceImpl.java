@@ -11,6 +11,7 @@ import uz.hojiakbar.child_tracking.entity.Family_Relations;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.enums.Platform;
 import uz.hojiakbar.child_tracking.enums.Status;
+import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
@@ -39,12 +40,12 @@ public class ChildServiceImpl implements ChildService {
 
         Child child = childRepository.findByEmail(email);
         if (child == null) {
-            throw new RuntimeException("Child topilmadi: " + email);
+            throw new ResourceNotFoundException("bola topilmadi: " + email);
         }
 
         Family_Relations relations = familyRelationsRepository
                 .findByChildEmail(email)
-                .orElseThrow(() -> new RuntimeException("Family_Relations topilmadi: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Family_Relations topilmadi: " + email));
 
         if (relations.getParent() == null) {
             throw new RuntimeException("Parent bog'lanmagan! generateInviteCode da xato bor.");

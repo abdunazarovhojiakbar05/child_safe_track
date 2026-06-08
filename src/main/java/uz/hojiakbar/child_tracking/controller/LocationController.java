@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class LocationController {
     @Operation(summary = "Child o'z locationini yuboradi")
     public ResponseEntity<String> sendLocation(
             @RequestBody @Valid LocationRequestDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws BadRequestException {
 
         locationService.saveLocation(userDetails, dto);
         return ResponseEntity.ok("Location saqlandi");

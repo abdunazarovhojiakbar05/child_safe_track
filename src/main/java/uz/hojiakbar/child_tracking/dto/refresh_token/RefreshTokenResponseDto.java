@@ -14,9 +14,9 @@ import lombok.Setter;
 public class RefreshTokenResponseDto {
 
     @JoinColumn(name = "refresh_token")
-    private String refreshToken;
+    private String refresh_token;
 
     @JoinColumn(name = "access_token")
-    private String accessToken;
+    private String access_token;
     private Long expires_in = 900L;
 }

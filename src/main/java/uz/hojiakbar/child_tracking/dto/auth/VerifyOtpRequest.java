@@ -17,5 +17,8 @@ public class VerifyOtpRequest {
     private String code;
 
     @JoinColumn(name = "session_id")
-    private UUID sessionID;
+    private UUID session_id;
+
+
 }
+

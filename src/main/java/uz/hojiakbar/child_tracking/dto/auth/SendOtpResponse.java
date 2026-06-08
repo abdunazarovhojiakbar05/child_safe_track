@@ -14,7 +14,7 @@ import java.util.UUID;
 public class SendOtpResponse {
 
     @JoinColumn(name = "session_id")
-    UUID sessionId;
+    UUID session_id;
 
     String code;
 }

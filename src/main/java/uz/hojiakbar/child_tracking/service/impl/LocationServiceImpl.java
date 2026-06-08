@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Geofences;
 import uz.hojiakbar.child_tracking.entity.Locations;
+import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.GeofencesRepository;
 import uz.hojiakbar.child_tracking.repository.LocationsRepository;
@@ -51,16 +53,16 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) {
+    public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) throws BadRequestException {
 
         Child child = userDetails.getChild();
 
         if (child == null) {
-            throw new RuntimeException("faqat bolangiz location yuborishis mumkin");
+            throw new BadRequestException("faqat bolangiz location yuborishis mumkin");
         }
 
 
-        Child menageChild = childRepository.findById(child.getId()).orElseThrow(() -> new RuntimeException("child not found"));
+        Child menageChild = childRepository.findById(child.getId()).orElseThrow(() -> new ResourceNotFoundException("child not found"));
 
         LocalDateTime recordedAt = dto.getTimestamp() != null
                 ? LocalDateTime.ofInstant(
@@ -128,7 +130,7 @@ public class LocationServiceImpl implements LocationService {
         return locationsRepository
                 .findLastByChildId(childId)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Hali location yuborilmagan!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Hali location yuborilmagan!"));
     }
 
     @Override

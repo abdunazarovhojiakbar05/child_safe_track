@@ -21,6 +21,7 @@ import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
+import javax.management.relation.Relation;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,16 +38,18 @@ public class UsersServiceImpl implements UsersService {
     private final ChildRepository childRepository;
     private final FamilyRelationsRepository familyRepository;
     private final Random random = new Random();
-    private final DeviceRepository deviceRepository;
+
 
 
     @Override
+    @Transactional(readOnly = true)
     public ParentDashboardResponseDto getParentDashboard(String emailUser) {
 
-        String email =   emailUser ;
+
+        List<Family_Relations > relation = familyRepository.findByParentEmail(emailUser);
 
         SummaryResponseDto summary = new SummaryResponseDto();
-        summary.setActiveChildren(activeChildren(email));
+        summary.setActiveChildren(activeChildren(emailUser));
         summary.setTotalAlertsToday(3);
         summary.setUnreadAlerts(2);
 
@@ -61,7 +64,7 @@ public class UsersServiceImpl implements UsersService {
         location.setAddress(address);
         location.setLatitude(BigDecimal.valueOf(234.3456));
         location.setLongitude(BigDecimal.valueOf(345.3456));
-         location.setCreatedAt(LocalDateTime.now());
+        location.setCreatedAt(LocalDateTime.now());
 
 
 /// --------------------------------------------------
@@ -88,6 +91,7 @@ public class UsersServiceImpl implements UsersService {
 
 
 ///-----------------------------------------------------------------------------------------
+
         children.add(new ChildDashboardDto(
                 UUID.randomUUID(),
                 "Kimsanov  Hoshim",
@@ -109,7 +113,6 @@ public class UsersServiceImpl implements UsersService {
 
         return new ParentDashboardResponseDto(summary, children, geofences, dailyActivitySummary, recentAlerts);
     }
-
 
 
 
@@ -169,6 +172,7 @@ public class UsersServiceImpl implements UsersService {
         usersRepository.save(parent);
     }
 
+
     @Override
     public ChildDashboardResponseDto getChildById(UUID childId, CustomUserDetails userDetails) {
         Child child = childRepository.findById(childId).orElseThrow(() -> new ResourceNotFoundException("child not found"));
@@ -181,7 +185,6 @@ public class UsersServiceImpl implements UsersService {
             throw new ResourceNotFoundException("parent not found");
         }
 
-        //Device device = deviceRepository.findByChildId(childId).orElseThrow(() -> new ResourceNotFoundException("device not found"));
 
         return new ChildDashboardResponseDto();
 

@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,6 +26,7 @@ import uz.hojiakbar.child_tracking.service.AuthService;
 import uz.hojiakbar.child_tracking.service.RefreshTokenService;
 import uz.hojiakbar.child_tracking.util.JwtUtils;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +66,8 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+
+
     SendOtpResponse getLoginWithSMS(String email) {
         throw new RuntimeException("SMS login not supported yet");
     }
@@ -73,6 +77,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
+
+    @Transactional
     SendOtpResponse getLoginWithEmail(String email) {
 
 
@@ -120,10 +126,6 @@ public class AuthServiceImpl implements AuthService {
 //        }
         System.out.println("device Id  :  " + session.getDeviceId().toString());
 
-        if (user == null) {
-            throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
-        }
-
 
         String code = String.valueOf((int) (Math.random() * 900000) + 100000);
 
@@ -134,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
         sendEmail(user.getEmail(), code);
 
         return SendOtpResponse.builder()
-                .sessionId(session.getId())
+                .session_id(session.getId())
                 .code(code)
                 .build();
 
@@ -144,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDto verifyOtpCode(VerifyOtpRequest dto) {
         LocalDateTime now = LocalDateTime.now();
 
-        Session session1 = sessionRepository.findSessionById(dto.getSessionID());
+        Session session1 = sessionRepository.findSessionById(dto.getSession_id());
 
         if (session1 == null) {
             throw new ResourceNotFoundException("Session topilmadi! Qayta login qiling.");
@@ -271,10 +273,31 @@ public class AuthServiceImpl implements AuthService {
         return new RefreshTokenResponseDto(newRefreshToken, newAccessToken, expires_in);
     }
 
-    @Override
-    public void logout(String token) {
-        if (token != null) {
-            refreshtokenService.deleteByAccessToken(token);
+    @Transactional
+    public void logout(String token) throws BadRequestException {
+        if (token == null) {
+            throw new BadRequestException("Token mavjud emas");
+        }
+
+         if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        Session session = sessionRepository.findByAccessToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Session topilmadi"));
+
+         session.setAccessToken(null);
+        session.setRefreshToken(null);
+        session.setRevokedAt(LocalDateTime.now());
+        sessionRepository.save(session);
+
+
+         Device device = deviceRepository.findById(session.getDeviceId())
+                .orElse(null);
+        if (device != null) {
+            device.setActive(false);
+            device.setLast_seen_at(new Timestamp(System.currentTimeMillis()));
+            deviceRepository.save(device);
         }
     }
 }

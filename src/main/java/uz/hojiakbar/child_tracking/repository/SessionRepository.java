@@ -23,7 +23,7 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     Session findSessionById(UUID id);
 
-
+    Optional<Session> findByAccessToken(String accessToken);
 
    @Modifying
 @Transactional
