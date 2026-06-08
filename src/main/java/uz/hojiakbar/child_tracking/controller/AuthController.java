@@ -33,6 +33,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.verifyOtpCode(requestDto));
     }
 
+
+
+
     @Operation(summary = "Ota-ona ro'yxatdan o'tishi", description = "Yangi ota-ona akkaunti yaratadi va qurilma (device) ma'lumotlarini tizimda saqlaydi.")
     @PostMapping("/registration")
     public ResponseEntity<SendOtpResponse> registration(@Valid @RequestBody RegistrationRequestDto requestDto) {
