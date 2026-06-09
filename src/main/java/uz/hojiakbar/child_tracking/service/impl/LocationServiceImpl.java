@@ -34,12 +34,12 @@ public class LocationServiceImpl implements LocationService {
     private final LocationsRepository locationsRepository;
     private final ChildRepository childRepository;
     private final GeofencesRepository geofencesRepository;
-    private final NotificationService notificationService;
+    private final NotificationService1 notificationService;
 
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double R = 6371e3; /// yer radiusi ekan
+        double R = 6371e3;
         double phi1 = Math.toRadians(lat1);
         double phi2 = Math.toRadians(lat2);
         double deltaPhi = Math.toRadians(lat2 - lat1);
@@ -107,14 +107,14 @@ public class LocationServiceImpl implements LocationService {
             if (wasInside == null || wasInside != insideNow) {
                 if (!insideNow && geofence.isNotifyOnExit()) {
                     notificationService.sendNotification(
-                            geofence.getCreatedBy().getFcmToken(),
+                            geofence.getCreatedBy().getFcm_token(),
                             "⚠️ Xavfsiz hudud",
                             child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
                     );
                 }
                 if (insideNow && geofence.isNotifyOnEnter()) {
                     notificationService.sendNotification(
-                            geofence.getCreatedBy().getFcmToken(),
+                            geofence.getCreatedBy().getFcm_token(),
                             "✅ Xavfsiz hudud",
                             child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
                     );

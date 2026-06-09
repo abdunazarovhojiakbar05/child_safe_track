@@ -204,7 +204,7 @@ public class AuthServiceImpl implements AuthService {
                     user.getFull_name(),
                     user.getAvatar_url(),
                     user.getPhone(),
-                    user.getFcmToken(),
+                    user.getFcm_token(),
                     user.getStatus(),
                     user.getIsActive(),
                     user.getDate_of_birth(),

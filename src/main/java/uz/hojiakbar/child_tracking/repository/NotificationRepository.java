@@ -1,0 +1,16 @@
+package uz.hojiakbar.child_tracking.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import uz.hojiakbar.child_tracking.entity.Notification;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+
+    Notification findByTitle(String title);
+
+    List<Notification> findByUserIdOrderByCreatedAtDesc(UUID id);
+
+    List<Notification> findByChildIdOrderByCreatedAtDesc(UUID id);
+}

@@ -8,9 +8,11 @@ import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public   class NotificationService1 {
 
     public void sendNotification(String fcmToken, String title, String body) {
 
@@ -38,4 +40,4 @@ public class NotificationService {
     }
 
 
-}
+ }

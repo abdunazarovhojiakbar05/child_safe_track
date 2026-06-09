@@ -1,8 +1,6 @@
 package uz.hojiakbar.child_tracking.service;
 
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.*;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 
@@ -19,4 +17,7 @@ public interface UsersService {
 
     ChildDashboardResponseDto getChildById(UUID childId, CustomUserDetails userDetails);
 
- }
+    UserProfileDto getProfile(CustomUserDetails userDetails);
+
+    UserProfileDto updateProfile(UpdateProfileDto dto, CustomUserDetails userDetails);
+}

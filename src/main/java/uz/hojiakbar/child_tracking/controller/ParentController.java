@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import uz.hojiakbar.child_tracking.dto.childDto.ChildRequestDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildDashboardResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
-import uz.hojiakbar.child_tracking.dto.parentDto.ParentDashboardResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.*;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.FamilyRelationsService;
@@ -34,9 +32,9 @@ public class ParentController {
         return ResponseEntity.ok(parentService.getParentDashboard(email));
     }
 
-    @PostMapping("/add-child")
+    @PostMapping("/mangeChild")
     @Operation(summary = "bolani qoshayotganda faqatgina ism va email beriladi")
-    public ResponseEntity<String> addChild(
+    public ResponseEntity<String>  manageChild (
             @RequestBody ChildRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String parentEmail = userDetails.getUsername();
@@ -59,17 +57,35 @@ public class ParentController {
         return ResponseEntity.ok(parentService.getChildById(childId, userDetails));
     }
 
-    @PutMapping("/fcm-token")
+    @PutMapping("/fcm_token")
     @Operation(summary = "FCM token yangilash")
     public ResponseEntity<String> updateFcmToken(
-            @RequestParam String fcmToken,
+            @RequestBody FCMTokenRequest fcmToken,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users parent = userDetails.getUsers();
         if (parent == null) {
             throw new RuntimeException("Faqat parent FCM token saqlashi mumkin!");
         }
-        parent.setFcmToken(fcmToken);
+
+        parent.setFcm_token(fcmToken.getFcm_token());
         usersService.save(parent);
         return ResponseEntity.ok("FCM token saqlandi");
+    }
+
+
+
+    @GetMapping("/profile")
+    @Operation(summary = "Parent profili")
+    public ResponseEntity<UserProfileDto> getProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(parentService.getProfile(userDetails));
+    }
+
+    @PutMapping("/profile")
+    @Operation(summary = "Profilni tahrirlash")
+    public ResponseEntity<UserProfileDto> updateProfile(
+            @RequestBody UpdateProfileDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(parentService.updateProfile(dto, userDetails));
     }
 }

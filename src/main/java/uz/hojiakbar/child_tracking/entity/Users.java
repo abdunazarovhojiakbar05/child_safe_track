@@ -30,7 +30,7 @@ public class Users {
     UUID id;
 
     @Column(name = "fcm_token")
-    String fcmToken;
+    String fcm_token;
 
 
     String verification_code;

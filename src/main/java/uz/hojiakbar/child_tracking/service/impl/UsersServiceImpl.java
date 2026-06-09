@@ -235,5 +235,15 @@ public class UsersServiceImpl implements UsersService {
        // TODO geofence bilan device malumoti toliq bolishi kerak exception beradi
     }
 
+    @Override
+    public UserProfileDto getProfile(CustomUserDetails userDetails) {
+        return null;
+    }
+
+    @Override
+    public UserProfileDto updateProfile(UpdateProfileDto dto, CustomUserDetails userDetails) {
+        return null;
+    }
+
 }
 

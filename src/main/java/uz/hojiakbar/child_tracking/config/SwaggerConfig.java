@@ -98,16 +98,15 @@ public class SwaggerConfig {
     public GroupedOpenApi parentApi() {
         return GroupedOpenApi.builder()
                 .group("2. Parent")
-                .pathsToMatch("/api/v1/parent/**")
+                .pathsToMatch("/api/v1/parent/**" , "/api/tasks/**", "/api/v1/notification/**")
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
-
     @Bean
     public GroupedOpenApi childApi() {
         return GroupedOpenApi.builder()
                 .group("3. Child")
-                .pathsToMatch("/api/v1/child/**")
+                .pathsToMatch("/api/v1/child/**", "/api/tasks/my", "/api/tasks/*/done", "/api/v1/notification/**")
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
