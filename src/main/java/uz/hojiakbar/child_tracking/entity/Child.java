@@ -37,7 +37,6 @@ public class Child {
     @Column(unique = true)
     String phone;
 
-    int age;
 
     @Enumerated(EnumType.STRING)
     Status verified = Status.NOT_VERIFIED;

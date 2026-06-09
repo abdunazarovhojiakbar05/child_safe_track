@@ -23,7 +23,6 @@ public class ChildDashboardDto {
 
     private boolean isOnline;
 
-    private Integer batteryLevel;
 
     private boolean isCharging;
 

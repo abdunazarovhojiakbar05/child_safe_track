@@ -64,8 +64,7 @@ public class UsersServiceImpl implements UsersService {
                             child.getFull_name(),
                             child.getAvatar_url(),
                             child.getIsActive(),
-                            child.getAge(),
-                            false,
+                             false,
                             location,
                             null,
                             null
@@ -121,7 +120,6 @@ public class UsersServiceImpl implements UsersService {
                 "Kimsanov  Hoshim",
                 "xali url yoq",
                 true,
-                34,
                 false,
                 location,
                 geofence,
@@ -163,7 +161,7 @@ public class UsersServiceImpl implements UsersService {
         List<Family_Relations> list = familyRepository.findByParentEmail(email);
 
         if(list.isEmpty()){
-            throw new ResourceNotFoundException("xali farszandingiz yoq");
+            return List.of();
         }
 
         return list.stream()

@@ -27,6 +27,7 @@ import uz.hojiakbar.child_tracking.service.AuthService;
 import uz.hojiakbar.child_tracking.service.RefreshTokenService;
 import uz.hojiakbar.child_tracking.util.JwtUtils;
 
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshtokenService;
     private final SessionRepository sessionRepository;
     private final DeviceRepository deviceRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
 
     @Override
@@ -130,12 +132,8 @@ public class AuthServiceImpl implements AuthService {
         deviceRepository.save(device);
 
 
-//        if ( GlobalVar.getDeviceId().equals(session.getDeviceId().toString())) {
-//            session.setDeviceId(UUID.fromString(GlobalVar.getDeviceId()));
-//            sessionRepository.save(session);
-//        }
 
-        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+        String code = String.format("%06d", secureRandom.nextInt(900000)  );
 
         user.setVerification_code(code);
         user.setCode_generated_at(LocalDateTime.now());
@@ -214,6 +212,7 @@ public class AuthServiceImpl implements AuthService {
                     refreshToken,
                     expires_in);
         } else {
+
             throw new RuntimeException("Kod xato!");
         }
     }

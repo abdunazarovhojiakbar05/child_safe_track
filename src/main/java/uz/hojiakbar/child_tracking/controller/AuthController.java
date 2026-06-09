@@ -46,7 +46,6 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<RefreshTokenResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto dto) {
         RefreshTokenResponseDto response = authService.refreshToken(dto);
-        /// TODO OPTIMALLASHTIRISH KERAK
         return ResponseEntity.ok(response);
     }
 
