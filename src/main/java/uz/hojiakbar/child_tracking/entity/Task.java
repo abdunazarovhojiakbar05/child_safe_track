@@ -33,6 +33,8 @@ public class Task {
 
     LocalDateTime start_time;
 
+    LocalDateTime end_time;
+
     Boolean is_done = false;
 
     Step step;

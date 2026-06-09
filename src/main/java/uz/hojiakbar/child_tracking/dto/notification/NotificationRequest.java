@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 public class NotificationRequest {
 
-    String fcmToken;
+    String fcm_token;
     String title;
     String message;
     UUID user_id;

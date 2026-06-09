@@ -30,8 +30,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs/**", "/v3/api-docs",
-                                "/swagger-resources/**", "/webjars/**"
+                                "/swagger-resources/**", "/webjars/**",
+                                "/error"
                         ).permitAll()
+
+                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/child/register").permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/parent/**").hasRole("PARENT")
@@ -41,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tasks").hasRole("PARENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("PARENT")
                         .requestMatchers("/api/tasks/my").hasRole("CHILD")
-                        .requestMatchers("/api/tasks/**/done").hasRole("CHILD")
+                        .requestMatchers("/api/tasks/*/done").hasRole("CHILD")
                         .requestMatchers("/api/tasks/**").authenticated()
                         .requestMatchers("/api/v1/notification/send").hasAnyRole("PARENT", "ADMIN")
                         .requestMatchers("/api/v1/notification/**").authenticated()

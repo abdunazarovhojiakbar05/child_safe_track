@@ -6,16 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uz.hojiakbar.child_tracking.dto.notification.NotificationRequest;
-import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Notification;
-import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.NotificationRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.NotificationService;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -28,17 +25,13 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final FirebaseMessaging firebaseMessaging;
 
-    private final UsersRepository usersRepository;
-    private final ChildRepository childRepository;
 
     @Override
     public List<Notification> getNotifications(CustomUserDetails userDetails) {
         if (userDetails.isParent()) {
-            return notificationRepository
-                    .findNotificationByUser_Id(userDetails.getUsers().getId());
+            return notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userDetails.getUsers().getId());
         } else {
-            return notificationRepository
-                    .findNotificationByChild_Id(userDetails.getChild().getId());
+            return notificationRepository.findAllByChildIdOrderByCreatedAtDesc(userDetails.getChild().getId());
         }
     }
 
@@ -56,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void markAllAsRead(CustomUserDetails userDetails) {
         if (userDetails.isParent()) {
-            notificationRepository.markAllAsReadByUserId(userDetails.getUsers().getId());
+            notificationRepository.markAllAsReadByChildId(userDetails.getUsers().getId());
         } else {
             notificationRepository.markAllAsReadByChildId(userDetails.getChild().getId());
         }
@@ -65,32 +58,22 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotification(CustomUserDetails userDetails, NotificationRequest request) {
 
-
-
         String title = request.getTitle();
         String message = request.getMessage();
-        String fcmToken = request.getFcmToken();
+        String fcmToken = request.getFcm_token();
 
-        Users user = request.getUser_id() != null
-                ? usersRepository.findById(request.getUser_id()).orElse(null)
-                : null;
+        UUID userId = request.getUser_id();
+        UUID childId = request.getChild_id();
 
-        Child child = request.getChild_id() != null
-                ? childRepository.findById(request.getChild_id()).orElse(null)
-                : null;
-
-
-                Notification notification = Notification.builder()
+        Notification notification = Notification.builder()
                 .title(title)
                 .message(message)
+                .user_id(userId)
+                .child_id(childId)
                 .is_read(false)
                 .build();
 
-        notification.setUser(user);
-        notification.setChild(child);
         notificationRepository.save(notification);
-
-
 
         if (fcmToken != null && !fcmToken.isBlank()) {
             try {
@@ -102,6 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 .build())
                         .build();
                 firebaseMessaging.send(firebaseMessage);
+                log.info("Firebase push notification muvaffaqiyatli yuborildi. Token: {}", fcmToken);
             } catch (Exception e) {
                 log.warn("Firebase push yuborishda xatolik: {}", e.getMessage());
             }

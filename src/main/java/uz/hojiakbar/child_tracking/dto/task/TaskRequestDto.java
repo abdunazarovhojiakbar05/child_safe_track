@@ -25,5 +25,7 @@ public class TaskRequestDto {
 
     private LocalDateTime start_time;
 
+    private LocalDateTime end_time;
+
     private UUID location_id;
 }

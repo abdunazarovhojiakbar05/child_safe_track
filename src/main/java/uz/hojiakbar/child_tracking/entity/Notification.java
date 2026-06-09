@@ -21,13 +21,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
-    Users user;
+    UUID user_id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "child_id", nullable = true)
-    Child child;
+    UUID child_id;
 
     String title;
 

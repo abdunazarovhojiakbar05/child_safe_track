@@ -22,19 +22,19 @@ public class TaskResponseDto {
 
     private String description;
 
-    private Boolean isDone;
+    private Boolean is_done;
 
     @Enumerated(EnumType.STRING)
     Step step;
 
-    private LocalDateTime dueDate;
+    private LocalDateTime start_time;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
-    private UUID childId;
+    private UUID child_id;
 
-    private String childName;
+    private String child_name;
 
-    private UUID locationId;
+    private UUID location_id;
 
 }

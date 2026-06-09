@@ -34,9 +34,7 @@ public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final ChildRepository childRepository;
     private final FamilyRelationsRepository familyRepository;
-    private final DeviceRepository deviceRepository;
-    private final LocationsRepository locationsRepository;
-    private final Random random = new Random();
+     private final LocationsRepository locationsRepository;
 
 
 

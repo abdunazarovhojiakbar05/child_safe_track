@@ -50,6 +50,7 @@ public class TaskServiceImpl implements TaskService {
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .start_time(dto.getStart_time())
+                .end_time(dto.getEnd_time())
                 .step(Step.START)
                 .is_done(false)
                 .locations(location)
@@ -121,12 +122,12 @@ public class TaskServiceImpl implements TaskService {
                 .id(task.getId())
                 .title(task.getTitle())
                 .description(task.getDescription())
-                .isDone(task.getIs_done())
+                .is_done(task.getIs_done())
                 .step(task.getStep())
-                .createdAt(task.getCreated_at())
-                .childId(task.getChild().getId())
-                .childName(task.getChild().getFull_name())
-                .locationId(task.getLocations() != null ? task.getLocations().getId() : null)
+                .created_at(task.getCreated_at())
+                .child_id(task.getChild().getId())
+                .child_name(task.getChild().getFull_name())
+                .location_id(task.getLocations() != null ? task.getLocations().getId() : null)
                 .build();
     }
 }
