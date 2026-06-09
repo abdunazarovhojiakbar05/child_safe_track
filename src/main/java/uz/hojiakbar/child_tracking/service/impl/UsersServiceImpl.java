@@ -9,19 +9,12 @@ import uz.hojiakbar.child_tracking.dto.response.AlertResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.GeofenceResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.*;
-import uz.hojiakbar.child_tracking.enums.Alert_Severity;
-import uz.hojiakbar.child_tracking.enums.Alert_Type;
-import uz.hojiakbar.child_tracking.enums.Geofences_Type;
-import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.*;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
-import javax.management.relation.Relation;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.*;
@@ -34,7 +27,9 @@ public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final ChildRepository childRepository;
     private final FamilyRelationsRepository familyRepository;
-     private final LocationsRepository locationsRepository;
+    private final LocationsRepository locationsRepository;
+    private final GeofencesRepository geofencesRepository;
+    private final AlertsRepository alertsRepository;
 
 
 
@@ -62,78 +57,71 @@ public class UsersServiceImpl implements UsersService {
                             child.getFull_name(),
                             child.getAvatar_url(),
                             child.getIsActive(),
-                             false,
+                            false,
                             location,
                             null,
                             null
                     );
                 }).toList());
 
+        Users parent = usersRepository.findByEmail(emailUser);
+        if (parent == null) {
+            throw new ResourceNotFoundException("Foydalanuvchi topilmadi: " + emailUser);
+        }
+
+        List<GeofenceResponseDto> geofences = new ArrayList<>();
+        for (Family_Relations r : relation) {
+            if (r.getChild() != null) {
+                geofencesRepository.findActiveByChildId(r.getChild().getId())
+                        .stream()
+                        .map(this::toGeofenceDto)
+                        .forEach(geofences::add);
+            }
+        }
+
+        List<AlertResponseDto> recentAlerts = alertsRepository
+                .findByParentId(parent.getId())
+                .stream()
+                .limit(5)
+                .map(this::toAlertDto)
+                .toList();
+
         SummaryResponseDto summary = new SummaryResponseDto();
-        summary.setActiveChildren(relation.size());
-        summary.setTotalAlertsToday(0);
-        summary.setUnreadAlerts(0);
+        summary.setActiveChildren((int) relation.stream()
+                .filter(r -> r.getChild() != null && Boolean.TRUE.equals(r.getChild().getIsActive()))
+                .count());
+        summary.setTotalAlertsToday(alertsRepository.countTodayAlerts(parent.getId()));
+        summary.setUnreadAlerts(alertsRepository.countUnreadAlerts(parent.getId()));
 
-        List<ChildDashboardDto> children1 = new ArrayList<>();                                 /////
-        List<GeofenceResponseDto> geofences = new ArrayList<>();                             /////
-        List<ActivitySummaryResponseDto> dailyActivitySummary = new ArrayList<>();          /////
-        List<AlertResponseDto> recentAlerts = new ArrayList<>();                           /////
-
-/// -------------------------------------------------------------------------------------------
-        LocationResponseDto location = new LocationResponseDto();
-        Address address = new Address("Toshkent", "Sergeli");
-        location.setAddress(address);
-        location.setLatitude(BigDecimal.valueOf(234.3456));
-        location.setLongitude(BigDecimal.valueOf(345.3456));
-        location.setCreated_at(LocalDateTime.now());
-
-
-/// --------------------------------------------------
-        GeofenceResponseDto geofence = new GeofenceResponseDto();
-        geofence.setId(UUID.randomUUID());
-        geofence.setName("xali");
-        geofence.setType(Geofences_Type.SAFE);
-///-------------------------------------------------------------
-
-
-        ActivitySummaryResponseDto activitySummary = new ActivitySummaryResponseDto();
-        activitySummary.setDistance(2345D);
-        activitySummary.setPlaces_visited(2342D);
-        activitySummary.setScreen_time_min(341);
-
-///-----------------------------------------------------------------------
-
-        AlertResponseDto alert = new AlertResponseDto();
-        alert.setId(UUID.randomUUID());
-        alert.setTitle("pul kerak");
-        alert.setType(Alert_Type.DEVICE_OFFLINE);
-        alert.setCreated_at(LocalDateTime.now());
-        alert.setSeverity(Alert_Severity.WARNING);
-
-
-///-----------------------------------------------------------------------------------------
-
-        children.add(new ChildDashboardDto(
-                UUID.randomUUID(),
-                "Kimsanov  Hoshim",
-                "xali url yoq",
-                true,
-                false,
-                location,
-                geofence,
-                activitySummary
-        ));
-
-        geofences.add(geofence);
-        dailyActivitySummary.add(activitySummary);
-        recentAlerts.add(alert);
-
-
-
+        List<ActivitySummaryResponseDto> dailyActivitySummary = new ArrayList<>();
 
         return new ParentDashboardResponseDto(summary, children, geofences, dailyActivitySummary, recentAlerts);
     }
 
+
+    private GeofenceResponseDto toGeofenceDto(Geofences g) {
+        GeofenceResponseDto dto = new GeofenceResponseDto();
+        dto.setId(g.getId());
+        dto.setName(g.getName());
+        dto.setType(g.getType());
+        dto.setCenter_lat(g.getCenterLat() != null ? g.getCenterLat().doubleValue() : null);
+        dto.setCenter_lon(g.getCenterLon() != null ? g.getCenterLon().doubleValue() : null);
+        dto.setRadius_metres(g.getRadiusMetres() != null ? g.getRadiusMetres().doubleValue() : null);
+        dto.set_active(g.isActive());
+        dto.setNotify_on_enter(g.isNotifyOnEnter());
+        dto.setNotify_on_exit(g.isNotifyOnExit());
+        return dto;
+    }
+
+    private AlertResponseDto toAlertDto(Alerts a) {
+        AlertResponseDto dto = new AlertResponseDto();
+        dto.setId(a.getId());
+        dto.setTitle(a.getTitle());
+        dto.setType(a.getType());
+        dto.setSeverity(a.getSeverity());
+        dto.setCreated_at(a.getCreated_at() != null ? a.getCreated_at().toLocalDateTime() : null);
+        return dto;
+    }
 
     private LocationResponseDto toLocationDto(Locations loc) {
         LocationResponseDto dto = new LocationResponseDto();
@@ -226,11 +214,11 @@ public class UsersServiceImpl implements UsersService {
                 .date_of_birth(child.getDate_of_birth())
                 .verified(child.getVerified())
                 .location(location)
-                .geofence(null) // geofence keyinroq
+                .geofence(null)
                 .device(null)
                 .build();
 
-       // TODO geofence bilan device malumoti toliq bolishi kerak exception beradi
+        // TODO geofence bilan device malumoti toliq bolishi kerak exception beradi
     }
 
     @Override
@@ -244,4 +232,3 @@ public class UsersServiceImpl implements UsersService {
     }
 
 }
-

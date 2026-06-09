@@ -5,6 +5,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import uz.hojiakbar.child_tracking.dto.request.LocationRequestDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
@@ -35,6 +36,7 @@ public class LocationServiceImpl implements LocationService {
     private final ChildRepository childRepository;
     private final GeofencesRepository geofencesRepository;
     private final NotificationService1 notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -85,9 +87,20 @@ public class LocationServiceImpl implements LocationService {
 
         locationsRepository.save(locations);
 
+        LocationResponseDto locationResponseDto = toDto(locations);
+        messagingTemplate.convertAndSend(
+                "/topic/locations/" + child.getId(),
+                locationResponseDto
+        );
+
         checkGeofence(child, dto.getLatitude(), dto.getLongitude());
 
     }
+
+    /**
+     * ws://your-domain.com/ws
+       subscribe: /topic/location/{childId}
+     */
 
 
     @Override

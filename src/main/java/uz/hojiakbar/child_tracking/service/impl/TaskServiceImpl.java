@@ -74,7 +74,7 @@ public class TaskServiceImpl implements TaskService {
         if (!userDetails.isChild()) {
             throw new ValidationException("Faqat bola o'z vazifalarini ko'ra oladi!");
         }
-        return taskRepository.findTaskByParent_Id(userDetails.getChild().getId())
+        return taskRepository.findTaskByChild_Id(userDetails.getChild().getId())
                 .stream().map(this::toDto).toList();
     }
 

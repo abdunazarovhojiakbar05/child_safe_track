@@ -49,6 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/tasks/**").authenticated()
                         .requestMatchers("/api/v1/notification/send").hasAnyRole("PARENT", "ADMIN")
                         .requestMatchers("/api/v1/notification/**").authenticated()
+                        .requestMatchers("/api/v1/sos/trigger").hasRole("CHILD")
+                        .requestMatchers("/api/v1/sos/**").authenticated()
+                        .requestMatchers("/api/v1/alerts/**").hasAnyRole("PARENT", "CHILD")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

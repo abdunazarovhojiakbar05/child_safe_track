@@ -106,7 +106,7 @@ public class SwaggerConfig {
     public GroupedOpenApi childApi() {
         return GroupedOpenApi.builder()
                 .group("3. Child")
-                .pathsToMatch("/api/v1/child/**", "/api/tasks/my", "/api/tasks/*/done", "/api/v1/notification/**")
+                .pathsToMatch("/api/v1/child/**", "/api/tasks/my", "/api/tasks/*/done", "/api/v1/notification/**", "/api/v1/sos/**")
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
