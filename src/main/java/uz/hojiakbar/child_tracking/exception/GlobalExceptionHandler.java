@@ -81,10 +81,11 @@ public class GlobalExceptionHandler {
 
     // 500 - Qolgan hamma xatolik
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(
-            Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex, HttpServletRequest request) {
+        ex.printStackTrace();
         return build(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Serverda xatolik yuz berdi", request.getRequestURI());
+                ex.getMessage(),
+                request.getRequestURI());
     }
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message, String path) {

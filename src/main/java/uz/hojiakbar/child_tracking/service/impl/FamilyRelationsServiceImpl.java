@@ -49,7 +49,7 @@ public class FamilyRelationsServiceImpl implements FamilyRelationsService {
 
         String childToken = jwtUtils.generateToken(child.getEmail());
 
-         Session session = new Session();
+        Session session = new Session();
         session.setChild(child);
         session.setAccessToken(childToken);
         session.setCreatedAt(LocalDateTime.now());

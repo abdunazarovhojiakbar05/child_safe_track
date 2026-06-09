@@ -34,7 +34,7 @@ public class Session {
     @Column(name = "access_token", nullable = true, unique = true)
     String accessToken;
 
-    @Column(name = "device_id", nullable = false)
+    @Column(name = "device_id", nullable = true)
     UUID deviceId;
 
     @Column(name = "device_name", nullable = true)
