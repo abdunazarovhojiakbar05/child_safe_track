@@ -3,19 +3,13 @@ package uz.hojiakbar.child_tracking.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import uz.hojiakbar.child_tracking.service.impl.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
@@ -39,13 +33,18 @@ public class SecurityConfig {
                                 "/swagger-resources/**", "/webjars/**"
                         ).permitAll()
 
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/v1/child/register").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/parent/**").hasRole("PARENT")
                         .requestMatchers("/api/v1/location/send").hasRole("CHILD")
                         .requestMatchers("/api/v1/location/**").hasRole("PARENT")
                         .requestMatchers("/api/v1/geofences/**").hasRole("PARENT")
+                        .requestMatchers(HttpMethod.POST, "/api/tasks").hasRole("PARENT")
+                        .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("PARENT")
+                        .requestMatchers("/api/tasks/my").hasRole("CHILD")
+                        .requestMatchers("/api/tasks/**/done").hasRole("CHILD")
+                        .requestMatchers("/api/tasks/**").authenticated()
+                        .requestMatchers("/api/v1/notification/send").hasAnyRole("PARENT", "ADMIN")
+                        .requestMatchers("/api/v1/notification/**").authenticated()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

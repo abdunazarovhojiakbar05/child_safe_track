@@ -14,9 +14,12 @@ public interface TaskService {
 
     List<TaskResponseDto> getMyTasks(CustomUserDetails userDetails);
 
-    void markAsDone(UUID id, CustomUserDetails userDetails);
+    TaskResponseDto markAsDone(UUID id, CustomUserDetails userDetails);
 
     void deleteTask(UUID id, CustomUserDetails userDetails);
 
     TaskResponseDto updateTask(UUID id, TaskRequestDto dto, CustomUserDetails userDetails);
+
+
+
 }

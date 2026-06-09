@@ -33,8 +33,8 @@ public class Notification {
 
     String message;
 
-    Boolean isRead = false;
+    Boolean is_read = false;
 
     @CreationTimestamp
-    LocalDateTime createdAt;
+    LocalDateTime created_at;
 }

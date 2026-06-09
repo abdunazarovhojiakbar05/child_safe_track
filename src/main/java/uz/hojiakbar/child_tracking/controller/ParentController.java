@@ -32,7 +32,7 @@ public class ParentController {
         return ResponseEntity.ok(parentService.getParentDashboard(email));
     }
 
-    @PostMapping("/mangeChild")
+    @PostMapping("/manage_child")
     @Operation(summary = "bolani qoshayotganda faqatgina ism va email beriladi")
     public ResponseEntity<String>  manageChild (
             @RequestBody ChildRequestDto requestDto,

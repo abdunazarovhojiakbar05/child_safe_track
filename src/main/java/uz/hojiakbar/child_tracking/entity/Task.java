@@ -3,6 +3,7 @@ package uz.hojiakbar.child_tracking.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import uz.hojiakbar.child_tracking.enums.Step;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -34,10 +35,12 @@ public class Task {
 
     Boolean is_done = false;
 
+    Step step;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = true)
     Locations locations;
 
     @CreationTimestamp
-    LocalDateTime createdAt;
+    LocalDateTime created_at;
 }

@@ -3,6 +3,7 @@ package uz.hojiakbar.child_tracking.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,11 +25,9 @@ public class FirebaseConfig {
 
                 InputStream serviceAccount;
                 if (firebaseBase64 != null && !firebaseBase64.isEmpty()) {
-                    // DIQQAT: Render'dan kelgan Base64 matnni tozalab, haqiqiy JSON baytlariga o'giramiz
                     byte[] decodedBytes = Base64.getDecoder().decode(firebaseBase64.trim());
                     serviceAccount = new ByteArrayInputStream(decodedBytes);
                 } else {
-                    // Lokal kompyuterda fayldan o'qish tizimi
                     serviceAccount = new FileInputStream(
                             "src/main/resources/firebase-service-account.json"
                     );
@@ -43,5 +42,10 @@ public class FirebaseConfig {
         } catch (IOException e) {
             throw new RuntimeException("Firebase config xato: " + e.getMessage());
         }
+    }
+
+    @Bean
+    public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) { // ← firebaseApp inject
+        return FirebaseMessaging.getInstance(firebaseApp); // ← faqat shu yetarli
     }
 }
