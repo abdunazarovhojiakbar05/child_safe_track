@@ -98,7 +98,12 @@ public class SwaggerConfig {
     public GroupedOpenApi parentApi() {
         return GroupedOpenApi.builder()
                 .group("2. Parent")
-                .pathsToMatch("/api/v1/parent/**" , "/api/tasks/**", "/api/v1/notification/**")
+                .pathsToMatch(
+                        "/api/v1/parent/**" ,
+                        "/api/tasks/**",
+                        "/api/v1/notification/**",
+                        "/api/v1/alert/**",
+                        "/api/v1/sos/*/resolve")
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
@@ -106,7 +111,14 @@ public class SwaggerConfig {
     public GroupedOpenApi childApi() {
         return GroupedOpenApi.builder()
                 .group("3. Child")
-                .pathsToMatch("/api/v1/child/**", "/api/tasks/my", "/api/tasks/*/done", "/api/v1/notification/**", "/api/v1/sos/**")
+                .pathsToMatch(
+                        "/api/v1/child/**",
+                        "/api/tasks/my",
+                        "/api/tasks/*/done",
+                        "/api/v1/notification/**",
+                        "/api/v1/sos/trigger",
+                        "/api/v1/sos/history",
+                        "/api/v1/alerts/**")
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }

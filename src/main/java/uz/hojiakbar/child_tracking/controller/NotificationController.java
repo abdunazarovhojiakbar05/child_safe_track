@@ -23,22 +23,19 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<List<Notification>> getAllNotifications(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        // TODO hamma notificationni olish kerak
-        return ResponseEntity.ok(notificationService.getNotifications(userDetails));
+         return ResponseEntity.ok(notificationService.getNotifications(userDetails));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<uz.hojiakbar.child_tracking.entity.Notification> getById(@PathVariable UUID id) {
-        // TODO get boganda is_read truega otishi kerak
-        return ResponseEntity.ok(notificationService.getById(id));
+         return ResponseEntity.ok(notificationService.getById(id));
     }
 
     @PutMapping("/read-all")
     public ResponseEntity<String> readAll(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         notificationService.markAllAsRead(userDetails);
-        // TODO hamma taskni olib  is_read truega o'tish kerak'
-        return ResponseEntity.ok("Hammasi o'qildi");
+         return ResponseEntity.ok("Hammasi o'qildi");
     }
 
     @PostMapping("/send")

@@ -21,7 +21,6 @@ import java.util.UUID;
 public class SuperAdminController {
 
     private final SuperAdminService service;
-    private final EntityManager entityManager;
 
     @GetMapping("/get_parent")
     public ResponseEntity<List<Users>> getAllPArent() {
@@ -51,20 +50,8 @@ public class SuperAdminController {
        return ResponseEntity.ok(service.getAllSession());
     }
 
-    private final SessionRepository sessionRepository;
 
-    @GetMapping("/fix-sessions")
-    public String fixDuplicateSessions() {
-        sessionRepository.deleteOldDuplicateSessions();
-        return "Duplicate sessionlar tozalandi!";
-    }
 
-    @Transactional
-    @GetMapping("/drop-password-column")
-    public ResponseEntity<String> dropPasswordColumn() {
-        entityManager.createNativeQuery("ALTER TABLE users DROP COLUMN password_hash").executeUpdate();
-        return ResponseEntity.ok("password_hash column o'chirildi!");
-    }
 
 
 }

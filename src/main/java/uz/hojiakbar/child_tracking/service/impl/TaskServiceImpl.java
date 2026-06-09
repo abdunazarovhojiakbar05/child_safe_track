@@ -76,6 +76,7 @@ public class TaskServiceImpl implements TaskService {
         }
         return taskRepository.findTaskByChild_Id(userDetails.getChild().getId())
                 .stream().map(this::toDto).toList();
+
     }
 
     @Override

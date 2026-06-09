@@ -1,9 +1,6 @@
 package uz.hojiakbar.child_tracking.dto.parentDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import uz.hojiakbar.child_tracking.enums.Gender;
 import uz.hojiakbar.child_tracking.enums.UserRole;
 
@@ -13,6 +10,7 @@ import java.util.UUID;
 
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

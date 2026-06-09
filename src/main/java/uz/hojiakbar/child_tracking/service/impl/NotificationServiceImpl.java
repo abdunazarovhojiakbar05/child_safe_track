@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import uz.hojiakbar.child_tracking.dto.notification.NotificationRequest;
 import uz.hojiakbar.child_tracking.entity.Notification;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
-import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.NotificationRepository;
-import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.NotificationService;
 
@@ -35,6 +33,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+
+
     @Override
     public Notification getById(UUID id) {
         Notification notification = notificationRepository.findById(id)
@@ -46,6 +46,9 @@ public class NotificationServiceImpl implements NotificationService {
         return notification;
     }
 
+
+
+
     @Override
     public void markAllAsRead(CustomUserDetails userDetails) {
         if (userDetails.isParent()) {
@@ -54,6 +57,8 @@ public class NotificationServiceImpl implements NotificationService {
             notificationRepository.markAllAsReadByChildId(userDetails.getChild().getId());
         }
     }
+
+
 
     @Override
     public void sendNotification(CustomUserDetails userDetails, NotificationRequest request) {

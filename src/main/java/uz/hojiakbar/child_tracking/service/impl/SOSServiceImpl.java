@@ -13,10 +13,8 @@ import uz.hojiakbar.child_tracking.enums.Alert_Severity;
 import uz.hojiakbar.child_tracking.enums.Alert_Type;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.AlertsRepository;
-import uz.hojiakbar.child_tracking.repository.ChildRepository;
-import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
-import uz.hojiakbar.child_tracking.repository.UsersRepository;
-import uz.hojiakbar.child_tracking.security.CustomUserDetails;
+ import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
+ import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.NotificationService;
 import uz.hojiakbar.child_tracking.service.SOSService;
 
@@ -30,8 +28,7 @@ import java.util.UUID;
 public class SOSServiceImpl implements SOSService {
 
 
-    private final UsersRepository usersRepository;
-    private final ChildRepository childRepository;
+
     private final FamilyRelationsRepository familyRelationsRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final AlertsRepository alertsRepository;
@@ -41,7 +38,7 @@ public class SOSServiceImpl implements SOSService {
     @Override
     public void triggerSos(CustomUserDetails userDetails, BigDecimal latitude, BigDecimal longitude) throws ValidationException {
 
-            if(!userDetails.isChild()){
+           if(!userDetails.isChild()){
                 throw new ValidationException("faqat bola SOS yuborishi mumkin");
             }
 
@@ -78,22 +75,18 @@ public class SOSServiceImpl implements SOSService {
             notificationRequest.setChild_id(child.getId());
 
             notificationService.sendNotification(userDetails, notificationRequest);
-
-
-
-         }
-
-
-
+    }
 
 
     @Override
     public List<Alerts> getSosHistory(CustomUserDetails userDetails) {
-        return List.of();
+        return alertsRepository.findByParentId(userDetails.getUsers().getId());
     }
 
     @Override
     public void resolveAlert(UUID alertId) {
-
+        Alerts alert = alertsRepository.findById(alertId).orElseThrow(  ()->  new ResourceNotFoundException("Alert topilmadi"));
+        alert.setRead(true);
+        alertsRepository.save(alert);
     }
 }

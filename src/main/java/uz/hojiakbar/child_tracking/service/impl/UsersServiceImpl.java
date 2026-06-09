@@ -9,12 +9,14 @@ import uz.hojiakbar.child_tracking.dto.response.AlertResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.GeofenceResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.*;
+import uz.hojiakbar.child_tracking.enums.Gender;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.*;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.*;
@@ -223,12 +225,57 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserProfileDto getProfile(CustomUserDetails userDetails) {
-        return null;
+        Users user = userDetails.getUsers();
+        if(user == null) throw new ResourceNotFoundException("User topilmadi");
+
+        Users u = usersRepository.findById(user.getId()).orElseThrow(()-> new ResourceNotFoundException("User topilmadi"));
+
+        return new UserProfileDto(
+                u.getId(),
+                u.getFull_name(),
+                u.getEmail(),
+                u.getPhone(),
+                u.getAvatar_url(),
+                u.getDate_of_birth(),
+                u.getGender(),
+                u.getIsActive(),
+                u.getCreated_at()
+        );
     }
+
+
 
     @Override
     public UserProfileDto updateProfile(UpdateProfileDto dto, CustomUserDetails userDetails) {
-        return null;
+        Users user = userDetails.getUsers();
+        if(user == null) throw new ResourceNotFoundException("User topilmadi");
+
+
+
+        Users u = usersRepository.findById(user.getId()).orElseThrow(()-> new ResourceNotFoundException("User topilmadi"));
+
+        u.setFull_name(dto.getFull_name());
+        u.setPhone(dto.getPhone());
+        u.setAvatar_url(dto.getAvatar_url());
+        u.setDate_of_birth(dto.getDate_of_birth());
+        u.setGender(dto.getGender());
+
+        usersRepository.save(u);
+
+
+        return new UserProfileDto(
+                u.getId(),
+                u.getFull_name(),
+                u.getEmail(),
+                u.getPhone(),
+                u.getAvatar_url(),
+                u.getDate_of_birth(),
+                u.getGender(),
+                u.getIsActive(),
+                u.getCreated_at()
+        );
+
+
     }
 
 }

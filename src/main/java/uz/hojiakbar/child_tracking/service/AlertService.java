@@ -12,9 +12,13 @@ public interface AlertService {
 
 
     List<Alerts> getTimeline(UUID childId, LocalDate date);
+
     List<Alerts> getHistory(UUID childId);
+
     List<Alerts> getUnread(CustomUserDetails userDetails) throws ValidationException;
+
     void markAsRead(UUID alertId);
+
     void markAllAsRead(CustomUserDetails userDetails) throws ValidationException;
 
 }

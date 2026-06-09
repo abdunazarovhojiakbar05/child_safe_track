@@ -34,7 +34,7 @@ public class ParentController {
 
     @PostMapping("/manage_child")
     @Operation(summary = "bolani qoshayotganda faqatgina ism va email beriladi")
-    public ResponseEntity<String>  manageChild (
+    public ResponseEntity<String>  manage_child (
             @RequestBody ChildRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String parentEmail = userDetails.getUsername();
@@ -44,14 +44,14 @@ public class ParentController {
 
     @GetMapping("/children")
     @Operation(summary = "Ota-onani bolalari ro'yxati")
-    public ResponseEntity<List<ChildListResponseDto>> getChildren(
+    public ResponseEntity<List<ChildListResponseDto>> get_children(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.getChildrenByParentEmail(userDetails.getUsername()));
     }
 
     @GetMapping("/child/{childId}")
     @Operation(summary = "Ota-ona id orqali bolasini profilini korishi || bola haqida to'liq ma'lumot")
-    public ResponseEntity<ChildDashboardResponseDto> getChildById(
+    public ResponseEntity<ChildDashboardResponseDto> get_child_by_id(
             @PathVariable UUID childId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.getChildById(childId, userDetails));
@@ -59,7 +59,7 @@ public class ParentController {
 
     @PutMapping("/fcm_token")
     @Operation(summary = "FCM token yangilash")
-    public ResponseEntity<String> updateFcmToken(
+    public ResponseEntity<String> update_fcm_token(
             @RequestBody FCMTokenRequest fcmToken,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users parent = userDetails.getUsers();
@@ -76,14 +76,14 @@ public class ParentController {
 
     @GetMapping("/profile")
     @Operation(summary = "Parent profili")
-    public ResponseEntity<UserProfileDto> getProfile(
+    public ResponseEntity<UserProfileDto> get_profile(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.getProfile(userDetails));
     }
 
     @PutMapping("/profile")
     @Operation(summary = "Profilni tahrirlash")
-    public ResponseEntity<UserProfileDto> updateProfile(
+    public ResponseEntity<UserProfileDto> update_profile(
             @RequestBody UpdateProfileDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(parentService.updateProfile(dto, userDetails));
