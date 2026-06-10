@@ -47,4 +47,9 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Transactional
     @Query("DELETE FROM notifications n WHERE n.created_at < :dateTime")
     void deleteOldNotifications(@Param("dateTime") java.time.LocalDateTime dateTime);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE notifications n SET n.is_read = true WHERE n.user_id = :childId AND n.is_read = false")
+    void markAllAsReadUser_id( @Param("user_id") UUID id);
 }

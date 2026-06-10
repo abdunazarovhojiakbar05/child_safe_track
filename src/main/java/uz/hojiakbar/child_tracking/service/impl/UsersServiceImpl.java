@@ -9,17 +9,18 @@ import uz.hojiakbar.child_tracking.dto.response.AlertResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.GeofenceResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.*;
-import uz.hojiakbar.child_tracking.enums.Gender;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.*;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 import uz.hojiakbar.child_tracking.service.UsersService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class UsersServiceImpl implements UsersService {
     private final GeofencesRepository geofencesRepository;
     private final AlertsRepository alertsRepository;
 
+    private final DeviceRepository deviceRepository;
 
 
     @Override
@@ -40,7 +42,7 @@ public class UsersServiceImpl implements UsersService {
     public ParentDashboardResponseDto getParentDashboard(String emailUser) {
 
 
-        List<Family_Relations > relation = familyRepository.findByParentEmail(emailUser);
+        List<Family_Relations> relation = familyRepository.findByParentEmail(emailUser);
 
 
         List<ChildDashboardDto> children = new ArrayList<>(relation.stream()
@@ -89,11 +91,11 @@ public class UsersServiceImpl implements UsersService {
                 .toList();
 
         SummaryResponseDto summary = new SummaryResponseDto();
-        summary.setActiveChildren((int) relation.stream()
+        summary.setActive_children((int) relation.stream()
                 .filter(r -> r.getChild() != null && Boolean.TRUE.equals(r.getChild().getIsActive()))
                 .count());
-        summary.setTotalAlertsToday(alertsRepository.countTodayAlerts(parent.getId()));
-        summary.setUnreadAlerts(alertsRepository.countUnreadAlerts(parent.getId()));
+        summary.setTotal_alerts_today(alertsRepository.countTodayAlerts(parent.getId()));
+        summary.setUnread_alerts(alertsRepository.countUnreadAlerts(parent.getId()));
 
         List<ActivitySummaryResponseDto> dailyActivitySummary = new ArrayList<>();
 
@@ -140,7 +142,6 @@ public class UsersServiceImpl implements UsersService {
     }
 
 
-
     @Override
     @Transactional(readOnly = true)
     public List<ChildListResponseDto> getChildrenByParentEmail(String email) {
@@ -148,7 +149,7 @@ public class UsersServiceImpl implements UsersService {
 
         List<Family_Relations> list = familyRepository.findByParentEmail(email);
 
-        if(list.isEmpty()){
+        if (list.isEmpty()) {
             return List.of();
         }
 
@@ -199,15 +200,28 @@ public class UsersServiceImpl implements UsersService {
                 .map(this::toLocationDto)
                 .orElse(null);
 
-      /*  DeviceResponseDto device = deviceRepository
-                .findDeviceByChild_Id(childId)
-                .map(d -> DeviceResponseDto.builder()
-                        .platform(d.getPlatform())
-                        .device_name(d.getDevice_name())
-                        .app_version(d.getApp_version())
-                        .isActive(d.isActive())
-                        .build())
-                .orElse(null);*/
+        Device device = deviceRepository.findDeviceByChild_Id(childId);
+
+        DeviceResponseDto deviceResponseDto = device != null ? DeviceResponseDto.builder()
+                .platform(device.getPlatform() != null ? device.getPlatform() : null)
+                .os_version(device.getOs_version() != null ? device.getOs_version() : null)
+                .model(device.getDevice_model() != null ? device.getDevice_model() : null)
+                .build() : null;
+
+        List<Geofences> geo = geofencesRepository.findActiveByChildId(childId);
+
+        GeofenceResponseDto geofence = geo != null && !geo.isEmpty() ? GeofenceResponseDto.builder()
+                .id(geo.get(0).getId())
+                .name(geo.get(0).getName())
+                .type(geo.get(0).getType())
+                .center_lat(geo.get(0).getCenterLat() != null ? geo.get(0).getCenterLat().doubleValue() : null)
+                .center_lon(geo.get(0).getCenterLon() != null ? geo.get(0).getCenterLon().doubleValue() : null)
+                .radius_metres(geo.get(0).getRadiusMetres() != null ? geo.get(0).getRadiusMetres().doubleValue() : null)
+                .is_active(geo.get(0).isActive())
+                .notify_on_enter(geo.get(0).isNotifyOnEnter())
+                .notify_on_exit(geo.get(0).isNotifyOnExit())
+                .build() : null;
+
 
         return ChildDashboardResponseDto.builder()
                 .id(child.getId())
@@ -216,19 +230,18 @@ public class UsersServiceImpl implements UsersService {
                 .date_of_birth(child.getDate_of_birth())
                 .verified(child.getVerified())
                 .location(location)
-                .geofence(null)
-                .device(null)
+                .geofence(geofence)
+                .device(deviceResponseDto)
                 .build();
 
-        // TODO geofence bilan device malumoti toliq bolishi kerak exception beradi
     }
 
     @Override
     public UserProfileDto getProfile(CustomUserDetails userDetails) {
         Users user = userDetails.getUsers();
-        if(user == null) throw new ResourceNotFoundException("User topilmadi");
+        if (user == null) throw new ResourceNotFoundException("User topilmadi");
 
-        Users u = usersRepository.findById(user.getId()).orElseThrow(()-> new ResourceNotFoundException("User topilmadi"));
+        Users u = usersRepository.findById(user.getId()).orElseThrow(() -> new ResourceNotFoundException("User topilmadi"));
 
         return new UserProfileDto(
                 u.getId(),
@@ -244,15 +257,13 @@ public class UsersServiceImpl implements UsersService {
     }
 
 
-
     @Override
     public UserProfileDto updateProfile(UpdateProfileDto dto, CustomUserDetails userDetails) {
         Users user = userDetails.getUsers();
-        if(user == null) throw new ResourceNotFoundException("User topilmadi");
+        if (user == null) throw new ResourceNotFoundException("User topilmadi");
 
 
-
-        Users u = usersRepository.findById(user.getId()).orElseThrow(()-> new ResourceNotFoundException("User topilmadi"));
+        Users u = usersRepository.findById(user.getId()).orElseThrow(() -> new ResourceNotFoundException("User topilmadi"));
 
         u.setFull_name(dto.getFull_name());
         u.setPhone(dto.getPhone());

@@ -54,7 +54,7 @@ public class ChildServiceImpl implements ChildService {
 
         child.setPhone(request.getPhone());
         child.setGender(request.getGender());
-        child.setDate_of_birth(request.getDatedOfBirth());
+        child.setDate_of_birth(request.getDated_of_birth());
         child.setVerified(Status.ACTIVE);
         child.setIsActive(true);
 

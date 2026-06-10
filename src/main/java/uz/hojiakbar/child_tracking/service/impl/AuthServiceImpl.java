@@ -43,7 +43,6 @@ public class AuthServiceImpl implements AuthService {
     private final JavaMailSender emailSender;
     private final JwtUtils jwtUtils;
 
-    private final RefreshTokenService refreshtokenService;
     private final SessionRepository sessionRepository;
     private final DeviceRepository deviceRepository;
     private final SecureRandom secureRandom = new SecureRandom();

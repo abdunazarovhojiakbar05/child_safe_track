@@ -1,21 +1,33 @@
 package uz.hojiakbar.child_tracking.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import uz.hojiakbar.child_tracking.entity.ErrorLog;
+import uz.hojiakbar.child_tracking.repository.ErrorLogRepository;
+import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 
+import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final ErrorLogRepository errorLogRepository;
 
     // 404
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -96,6 +108,37 @@ public class GlobalExceptionHandler {
                 .path(path)
                 .timestamp(LocalDateTime.now())
                 .build();
+
+        try {
+            ErrorLog log = new ErrorLog();
+            log.setError_message(message);
+            log.setPath(path);
+            log.setStatus(status.value());
+            log.setCreated_at(LocalDateTime.now());
+            log.setUser_id(getCurrentUserId());
+
+            errorLogRepository.save(log);
+
+
+        } catch (Exception e) {
+            System.err.println("Xatolikni bazaga yozishda xato bo'ldi: " + e.getMessage());
+        }
         return ResponseEntity.status(status).body(response);
+    }
+
+
+    private UUID getCurrentUserId() {
+        try {
+             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication != null && authentication.isAuthenticated()
+                    && !(authentication instanceof AnonymousAuthenticationToken)) {
+
+                 CustomUserDetails principal = (CustomUserDetails    ) authentication.getPrincipal();
+                return principal.getId();
+            }
+        } catch (Exception e) {
+         }
+        return null;
     }
 }

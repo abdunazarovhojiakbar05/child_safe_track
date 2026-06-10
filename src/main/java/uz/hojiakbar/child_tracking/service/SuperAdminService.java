@@ -1,5 +1,6 @@
 package uz.hojiakbar.child_tracking.service;
 
+import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
@@ -18,4 +19,6 @@ public interface SuperAdminService {
     String activeUser(UUID userId);
 
     List<Session> getAllSession();
+
+    List<ErrorLogResponseDto> getAllExceptions();
 }

@@ -12,11 +12,11 @@ import lombok.*;
 public class SummaryResponseDto {
 
     @JoinColumn(name = "active_children")
-    private int activeChildren;
+    private int active_children;
 
     @JoinColumn(name = "total_alerts_today")
-    private int totalAlertsToday
+    private int total_alerts_today
             ;
     @JoinColumn(name = "unread_alerts")
-    private int unreadAlerts;
+    private int unread_alerts;
 }

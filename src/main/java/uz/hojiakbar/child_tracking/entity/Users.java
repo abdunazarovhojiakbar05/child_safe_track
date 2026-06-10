@@ -36,6 +36,11 @@ public class Users {
     String verification_code;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "family_relations",
+            joinColumns = @JoinColumn(name = "parent_id"),
+            inverseJoinColumns = @JoinColumn(name = "child_id")
+    )
     List<Child> children = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

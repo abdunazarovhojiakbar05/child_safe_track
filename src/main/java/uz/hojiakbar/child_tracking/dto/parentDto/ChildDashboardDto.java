@@ -17,18 +17,18 @@ public class ChildDashboardDto {
 
     private UUID id;
 
-    private String fullName;
+    private String full_name;
 
-    private String avatarUrl;
+    private String avatar_url;
 
-    private boolean isOnline;
+    private boolean is_online;
 
 
-    private boolean isCharging;
+    private boolean is_charging;
 
-    private LocationResponseDto  lastLocation;
+    private LocationResponseDto  last_location;
 
-    private GeofenceResponseDto currentGeofence;
+    private GeofenceResponseDto current_geofence;
 
-    private ActivitySummaryResponseDto dailyActivitySummary;
+    private ActivitySummaryResponseDto daily_activity_summary;
 }

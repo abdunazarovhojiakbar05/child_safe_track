@@ -1,15 +1,13 @@
 package uz.hojiakbar.child_tracking.controller;
 
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
-import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.List;
@@ -51,7 +49,9 @@ public class SuperAdminController {
     }
 
 
-
-
+    @GetMapping("/get_all_exceptions")
+    public ResponseEntity<List<ErrorLogResponseDto>> getAllExceptions() {
+        return ResponseEntity.ok(service.getAllExceptions());
+    }
 
 }

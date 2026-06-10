@@ -17,12 +17,7 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
 
-    private Key getKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-    }
 
     // ✅ Nom to'g'irlandi: email emas, username (email yoki phone bo'lishi mumkin)
     public String generateToken(String username) {
@@ -30,9 +25,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(getKey())
-                .compact();
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime)).compact();
     }
 
     public String generateRefreshToken(String username) {
@@ -41,7 +34,6 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
-                .signWith(getKey())
                 .compact();
     }
 
@@ -64,7 +56,6 @@ public class JwtUtils {
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

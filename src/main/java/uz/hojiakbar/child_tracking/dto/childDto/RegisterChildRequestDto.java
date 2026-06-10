@@ -32,7 +32,7 @@ public class RegisterChildRequestDto {
     Status status;
 
     @JoinColumn(name = "date_of_birth")
-    Date datedOfBirth;
+    Date dated_of_birth;
 
     String phone;
 

@@ -4,11 +4,14 @@ package uz.hojiakbar.child_tracking.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
+import uz.hojiakbar.child_tracking.entity.ErrorLog;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
+import uz.hojiakbar.child_tracking.repository.ErrorLogRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
@@ -23,6 +26,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final UsersRepository usersRepository;
     private final ChildRepository childRepository;
     private final SessionRepository sessionRepository;
+    private final ErrorLogRepository errorLogRepository;
 
     @Override
     @Transactional
@@ -55,5 +59,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<Session> getAllSession() {
         return sessionRepository.findAll();
+    }
+
+    @Override
+    public List<ErrorLogResponseDto> getAllExceptions() {
+         List<ErrorLog> errors = errorLogRepository.findAll();
+
+         return errors.stream()
+                .map(e -> new ErrorLogResponseDto(
+                        e.getId(),
+                        e.getUser_id(),
+                        e.getException_type(),
+                        e.getError_message(),
+                        e.getStatus(),
+                        e.getPath(),
+                        e.getCreated_at()
+                ))
+                .toList();
     }
 }

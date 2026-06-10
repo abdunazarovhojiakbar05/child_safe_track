@@ -52,9 +52,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void markAllAsRead(CustomUserDetails userDetails) {
         if (userDetails.isParent()) {
-            notificationRepository.markAllAsReadByChildId(userDetails.getUsers().getId());
+            notificationRepository.markAllAsReadUser_id(userDetails.getUsers().getId());
         } else {
-            notificationRepository.markAllAsReadByChildId(userDetails.getChild().getId());
+            notificationRepository.markAllAsReadUser_id(userDetails.getChild().getId());
         }
     }
 
