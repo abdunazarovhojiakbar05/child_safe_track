@@ -4,6 +4,8 @@ package uz.hojiakbar.child_tracking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.hojiakbar.child_tracking.dto.auth.LoginResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
@@ -21,12 +23,12 @@ public class SuperAdminController {
     private final SuperAdminService service;
 
     @GetMapping("/get_parent")
-    public ResponseEntity<List<Users>> getAllPArent() {
+    public ResponseEntity<List<LoginResponseDto>> getAllPArent() {
        return ResponseEntity.ok(service.getAllParent());
     }
 
     @GetMapping("get_child")
-    public ResponseEntity<List<Child>> getAllChild() {
+    public ResponseEntity<List<ChildListResponseDto>> getAllChild() {
        return ResponseEntity.ok(service.getAllChild());
     }
 

@@ -124,7 +124,7 @@ public class SwaggerConfig {
                         "/api/tasks/*/done",
                         "/api/v1/notification/**",
                         "/api/v1/sos/trigger",
-                        "/api/v1/sos/history",
+                       // "/api/v1/sos/history",
                         "/api/v1/alerts/**",
                         "/api/v1/location/send"
                 )

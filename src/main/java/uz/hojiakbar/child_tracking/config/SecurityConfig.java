@@ -36,8 +36,9 @@ public class SecurityConfig {
 
                          .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/child/register").permitAll()
+                        .requestMatchers("/api/super-admin/**").permitAll()
 
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        //.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/parent/**").hasRole("PARENT")
                         .requestMatchers("/api/v1/location/send").hasRole("CHILD")
                         .requestMatchers("/api/v1/location/**").hasRole("PARENT")

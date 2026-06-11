@@ -34,7 +34,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-
     @Override
     public Notification getById(UUID id) {
         Notification notification = notificationRepository.findById(id)
@@ -47,8 +46,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-
-
     @Override
     public void markAllAsRead(CustomUserDetails userDetails) {
         if (userDetails.isParent()) {
@@ -57,7 +54,6 @@ public class NotificationServiceImpl implements NotificationService {
             notificationRepository.markAllAsReadUser_id(userDetails.getChild().getId());
         }
     }
-
 
 
     @Override

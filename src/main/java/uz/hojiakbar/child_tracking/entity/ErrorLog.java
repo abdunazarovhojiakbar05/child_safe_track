@@ -17,7 +17,7 @@ public class ErrorLog {
 
 
     @Id
-
+    @GeneratedValue
     private UUID id;
 
     private UUID user_id;

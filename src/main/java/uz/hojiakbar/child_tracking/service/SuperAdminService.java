@@ -1,5 +1,7 @@
 package uz.hojiakbar.child_tracking.service;
 
+import uz.hojiakbar.child_tracking.dto.auth.LoginResponseDto;
+import uz.hojiakbar.child_tracking.dto.parentDto.ChildListResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
@@ -10,9 +12,9 @@ import java.util.UUID;
 
 public interface SuperAdminService {
 
-    List<Users> getAllParent();
+    List<LoginResponseDto> getAllParent();
 
-    List<Child> getAllChild();
+    List<ChildListResponseDto> getAllChild();
 
     String blockUser(UUID userId);
 
