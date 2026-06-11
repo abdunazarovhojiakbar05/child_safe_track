@@ -18,7 +18,7 @@ public interface LocationService {
 
     LocationResponseDto getLastLocation(UUID childId);
 
-     List<LocationResponseDto> getRouteHistory(UUID childId);
+    List<LocationResponseDto> getRouteHistory(UUID childId);
 
     Page<LocationResponseDto> getRouteHistory(UUID childId, int page, int size);
 }

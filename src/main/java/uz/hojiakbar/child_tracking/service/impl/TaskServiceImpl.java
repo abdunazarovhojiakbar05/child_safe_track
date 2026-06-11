@@ -12,6 +12,7 @@ import uz.hojiakbar.child_tracking.enums.Step;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.exception.ValidationException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
+import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.LocationsRepository;
 import uz.hojiakbar.child_tracking.repository.TaskRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
@@ -28,6 +29,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final ChildRepository childRepository;
     private final LocationsRepository locationsRepository;
+    private final FamilyRelationsRepository familyRelationsRepository;
 
     @Override
     public TaskResponseDto createTask(TaskRequestDto dto, CustomUserDetails userDetails) {
@@ -37,6 +39,15 @@ public class TaskServiceImpl implements TaskService {
 
         Child child = childRepository.findById(dto.getChild_id())
                 .orElseThrow(() -> new ResourceNotFoundException("Bola topilmadi!"));
+
+
+
+        boolean isMyChild = familyRelationsRepository.findByParentEmail(userDetails.getUsers().getEmail())
+                .stream().anyMatch(relation -> relation.getChild().getId().equals(child.getId()));
+
+        if (!isMyChild) {
+            throw new ValidationException("Bu bola sizga tegishli emas!");
+        }
 
         Locations location = null;
         if (dto.getLocation_id() != null) {
@@ -83,6 +94,11 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponseDto markAsDone(UUID id, CustomUserDetails userDetails) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vazifa topilmadi!"));
+
+
+        if(task.getChild().getId().equals(userDetails.getChild().getId())){
+            throw new ValidationException("vazifa sizning bolangizga tegishli emas!");
+        }
 
         task.setIs_done(true);
         task.setStep(Step.FINISHED);

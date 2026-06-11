@@ -15,4 +15,12 @@ public class GlobalVar {
     public static void setDeviceName(String deviceName) {GlobalVar.deviceName.set(deviceName);}
     public static void setPlatform(String platform) {GlobalVar.platform.set(platform);}
     public static void setAppVersion(String appVersion) {GlobalVar.appVersion.set(appVersion);}
+
+
+    public static void removeAll() {
+        deviceId.remove();
+        deviceName.remove();
+        platform.remove();
+        appVersion.remove();
+    }
 }

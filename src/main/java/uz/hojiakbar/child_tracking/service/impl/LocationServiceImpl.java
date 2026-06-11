@@ -12,11 +12,13 @@ import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Geofences;
 import uz.hojiakbar.child_tracking.entity.Locations;
+import uz.hojiakbar.child_tracking.enums.Activity_Type;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.GeofencesRepository;
 import uz.hojiakbar.child_tracking.repository.LocationsRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
+import uz.hojiakbar.child_tracking.service.ActivitiesService;
 import uz.hojiakbar.child_tracking.service.LocationService;
 
 import java.math.BigDecimal;
@@ -37,6 +39,7 @@ public class LocationServiceImpl implements LocationService {
     private final GeofencesRepository geofencesRepository;
     private final NotificationService1 notificationService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ActivitiesService activitiesService;
 
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -56,6 +59,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+
     public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) throws BadRequestException {
 
         Child child = userDetails.getChild();
@@ -86,6 +90,32 @@ public class LocationServiceImpl implements LocationService {
                 .build();
 
         locationsRepository.save(locations);
+
+
+
+        activitiesService.save(
+                menageChild,
+                Activity_Type.LOCATION_UPDATED,
+                "Lokatsiya yangilandi",
+                null,
+                BigDecimal.valueOf(dto.getLatitude()),
+                BigDecimal.valueOf(dto.getLongitude()),
+                0,
+                null
+        );
+
+// Battery holati
+        if (dto.getBatteryLevel() != null) {
+            if (dto.getBatteryLevel() <= 5) {
+                activitiesService.save(menageChild, Activity_Type.BATTERY_CRITICAL,
+                        "Batareya kritik", "Batareya darajasi: " + dto.getBatteryLevel() + "%",
+                        null, null, 0, null);
+            } else if (dto.getBatteryLevel() <= 20) {
+                activitiesService.save(menageChild, Activity_Type.BATTERY_LOW,
+                        "Batareya kam", "Batareya darajasi: " + dto.getBatteryLevel() + "%",
+                        null, null, 0, null);
+            }
+        }
 
         LocationResponseDto locationResponseDto = toDto(locations);
         messagingTemplate.convertAndSend(
@@ -118,28 +148,46 @@ public class LocationServiceImpl implements LocationService {
             Boolean wasInside = geofence.getLastKnownInside();
 
             if (wasInside == null || wasInside != insideNow) {
-                if (!insideNow && geofence.isNotifyOnExit()) {
-                    notificationService.sendNotification(
-                            geofence.getCreatedBy().getFcm_token(),
-                            "⚠️ Xavfsiz hudud",
-                            child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
-                    );
+                if (!insideNow) {
+                    // Activity har doim saqlanadi
+                    activitiesService.save(child, Activity_Type.GEOFENCE_EXITED,
+                            "Xavfsiz hududdan chiqdi", geofence.getName(),
+                            geofence.getCenterLat(), geofence.getCenterLon(), 0, null);
+
+                    // Notification faqat yoqilgan bo'lsa
+                    if (geofence.isNotifyOnExit()) {
+                        notificationService.sendNotification(
+                                geofence.getCreatedBy().getFcm_token(),
+                                "⚠️ Xavfsiz hudud",
+                                child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
+                        );
+                    }
                 }
-                if (insideNow && geofence.isNotifyOnEnter()) {
-                    notificationService.sendNotification(
-                            geofence.getCreatedBy().getFcm_token(),
-                            "✅ Xavfsiz hudud",
-                            child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
-                    );
+                if (insideNow) {
+                    // Activity har doim saqlanadi
+                    activitiesService.save(child, Activity_Type.GEOFENCE_ENTERED,
+                            "Xavfsiz hududga kirdi", geofence.getName(),
+                            geofence.getCenterLat(), geofence.getCenterLon(), 0, null);
+
+                    // Notification faqat yoqilgan bo'lsa
+                    if (geofence.isNotifyOnEnter()) {
+                        notificationService.sendNotification(
+                                geofence.getCreatedBy().getFcm_token(),
+                                "✅ Xavfsiz hudud",
+                                child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
+                        );
+                    }
                 }
                 geofence.setLastKnownInside(insideNow);
                 toUpdate.add(geofence);
             }
-        }
 
-        if (!toUpdate.isEmpty()) {
-            geofencesRepository.saveAll(toUpdate);
         }
+                if (!toUpdate.isEmpty()) {
+                    geofencesRepository.saveAll(toUpdate);
+                }
+
+
     }
 
     @Override

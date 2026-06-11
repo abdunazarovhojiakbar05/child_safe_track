@@ -17,7 +17,7 @@ public class ErrorLog {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+
     private UUID id;
 
     private UUID user_id;

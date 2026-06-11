@@ -88,12 +88,14 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            GlobalVar.setDeviceId(null);
-            GlobalVar.setDeviceName(null);
-            GlobalVar.setPlatform(null);
-            GlobalVar.setAppVersion(null);
+            GlobalVar.removeAll();
         }
+
+
     }
+
+
+
 
 
 }

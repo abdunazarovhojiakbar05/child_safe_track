@@ -42,14 +42,6 @@ public class LocationController {
 
         return ResponseEntity.ok(locationService.getLastLocation(childId));
     }
-/*
-     @GetMapping("/route/{childId}")
-    @Operation(summary = "Farzandning yo'l tarixi")
-    public ResponseEntity<List<LocationResponseDto>> getRouteHistory(
-            @PathVariable UUID childId) {
-
-        return ResponseEntity.ok(locationService.getRouteHistory(childId));
-    }*/
 
     @GetMapping("/route/{childId}")
     @Operation(summary = "Farzandning yo'l tarixi (15 kunlik, sahifalab)")
@@ -60,4 +52,7 @@ public class LocationController {
 
         return ResponseEntity.ok(locationService.getRouteHistory(childId, page, size));
     }
+
+
+
 }
