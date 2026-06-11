@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/activities")
+@RequestMapping("/api/v1/activities")
 @RequiredArgsConstructor
 public class ActivitiesController {
 

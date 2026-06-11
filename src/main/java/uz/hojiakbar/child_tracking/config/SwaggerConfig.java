@@ -99,30 +99,38 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("2. Parent")
                 .pathsToMatch(
-                        "/api/v1/parent/**" ,
-                        "/api/tasks/**",
+                        "/api/v1/parent/**",
+                        "/api/v1/tasks/**",
                         "/api/v1/notification/**",
                         "/api/v1/alert/**",
-                        "/api/v1/sos/*/resolve")
+                        "/api/v1/sos/*/resolve",
+                        "/api/v1/geofences/**",
+                        "/api/v1/location/last/**",
+                        "/api/v1/location/route/**",
+                        "/api/v1/activities/**"
+                )
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
+
+
     @Bean
     public GroupedOpenApi childApi() {
         return GroupedOpenApi.builder()
                 .group("3. Child")
                 .pathsToMatch(
                         "/api/v1/child/**",
-                        "/api/tasks/my",
+                        "/api/v1/tasks/my",
                         "/api/tasks/*/done",
                         "/api/v1/notification/**",
                         "/api/v1/sos/trigger",
                         "/api/v1/sos/history",
-                        "/api/v1/alerts/**")
+                        "/api/v1/alerts/**",
+                        "/api/v1/location/send"
+                )
                 .addOperationCustomizer(globalHeaders())
                 .build();
     }
-
     @Bean
     public GroupedOpenApi locationApi() {
         return GroupedOpenApi.builder()
