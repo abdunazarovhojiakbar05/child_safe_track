@@ -17,15 +17,22 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
+    @Value("${jwt.secret}")
+    private String secretKey;
 
+    private Key getSigningKey() {
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
-    // ✅ Nom to'g'irlandi: email emas, username (email yoki phone bo'lishi mumkin)
     public String generateToken(String username) {
         long expirationTime = 1000L * 60 * 60 * 24 * 3; // 3 kun
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime)).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // ✅ imzo
+                .compact();
     }
 
     public String generateRefreshToken(String username) {
@@ -34,10 +41,11 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // ✅ imzo
                 .compact();
     }
 
-     public String getUsernameFromToken(String token) {
+    public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
     }
 
@@ -56,6 +64,7 @@ public class JwtUtils {
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey()) // ✅ imzo bilan parse
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

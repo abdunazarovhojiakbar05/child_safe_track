@@ -61,22 +61,20 @@ public class LocationServiceImpl implements LocationService {
     @Override
 
     public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) throws BadRequestException {
-
         Child child = userDetails.getChild();
 
         if (child == null) {
             throw new BadRequestException("faqat bolangiz location yuborishis mumkin");
         }
 
-
-        Child menageChild = childRepository.findById(child.getId()).orElseThrow(() -> new ResourceNotFoundException("child not found"));
+        Child menageChild = childRepository.findById(child.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("child not found"));
 
         LocalDateTime recordedAt = dto.getTimestamp() != null
                 ? LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(dto.getTimestamp()),
                 ZoneId.systemDefault())
                 : LocalDateTime.now();
-
 
         Locations locations = Locations.builder()
                 .child(menageChild)
@@ -90,19 +88,6 @@ public class LocationServiceImpl implements LocationService {
                 .build();
 
         locationsRepository.save(locations);
-
-
-
-        activitiesService.save(
-                menageChild,
-                Activity_Type.LOCATION_UPDATED,
-                "Lokatsiya yangilandi",
-                null,
-                BigDecimal.valueOf(dto.getLatitude()),
-                BigDecimal.valueOf(dto.getLongitude()),
-                0,
-                null
-        );
 
 // Battery holati
         if (dto.getBatteryLevel() != null) {
@@ -123,15 +108,34 @@ public class LocationServiceImpl implements LocationService {
                 locationResponseDto
         );
 
-        checkGeofence(child, dto.getLatitude(), dto.getLongitude());
+         Locations lastLocation = locationsRepository
+                .findLastByChildId(menageChild.getId())
+                .orElse(null);
 
+        if (lastLocation == null || calculateDistance(
+                dto.getLatitude(), dto.getLongitude(),
+                lastLocation.getLatitude().doubleValue(),
+                lastLocation.getLongitude().doubleValue()) > 25) {
+
+            activitiesService.save(
+                    menageChild,
+                    Activity_Type.LOCATION_UPDATED,
+                    "Lokatsiya yangilandi",
+                    null,
+                    BigDecimal.valueOf(dto.getLatitude()),
+                    BigDecimal.valueOf(dto.getLongitude()),
+                    0, null
+            );
+        }
+
+        checkGeofence(child, dto.getLatitude(), dto.getLongitude());
     }
 
-    /**
+
+  /**
      * ws://your-domain.com/ws
        subscribe: /topic/location/{childId}
      */
-
 
     @Override
     public void checkGeofence(Child child, double lat, double lng) {
