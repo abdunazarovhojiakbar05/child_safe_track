@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
         message.setText("Your verification code is: " + code + "\nThis code will expire in 5 minutes.");
         messageRepository.save(new Message(UUID.randomUUID(),emailOrPhoneReq.getEmail(),code, MessageStatus.SENT));
         mailSender.send(message);
-        return "Verification code was sent to your email";
+        return code;
     }
 
     @Override
