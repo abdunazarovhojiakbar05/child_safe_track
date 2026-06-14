@@ -20,9 +20,9 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
 
     Optional<Device> findByChild(Child child);
 
-    @Query("SELECT d FROM device d WHERE d.user = :user ORDER BY d.last_seen_at DESC LIMIT 1")
+    @Query("SELECT d FROM Device d WHERE d.user = :user ORDER BY d.last_seen_at DESC LIMIT 1")
     Optional<Device> findLatestByUser(@Param("user") Users user);
 
-    @Query("SELECT d FROM device d WHERE d.child = :child ORDER BY d.last_seen_at DESC LIMIT 1")
+    @Query("SELECT d FROM Device d WHERE d.child = :child ORDER BY d.last_seen_at DESC LIMIT 1")
     Optional<Device> findLatestByChild(@Param("child") Child child);
 }

@@ -139,14 +139,24 @@ public class AuthServiceImpl implements AuthService {
         session.setExpiresAt(LocalDateTime.now().plusDays(7));
         sessionRepository.save(session);
 
-        // Device yangilash
-        Device device = deviceRepository.findById(deviceID).orElse(new Device());
-        device.setId(deviceID);
-        device.setUser(user);
-        device.setApp_version(GlobalVar.getAppVersion());
-        device.setPlatform(platform);
-        device.setDevice_name(GlobalVar.getDeviceName());
-        deviceRepository.save(device);
+        // Device yangilash yoki yaratish
+        if (deviceRepository.existsById(deviceID)) {
+            deviceRepository.findById(deviceID).ifPresent(device -> {
+                device.setUser(user);
+                device.setApp_version(GlobalVar.getAppVersion());
+                device.setPlatform(platform);
+                device.setDevice_name(GlobalVar.getDeviceName());
+                deviceRepository.save(device);
+            });
+        } else {
+            Device device = new Device();
+            device.setId(deviceID);
+            device.setUser(user);
+            device.setApp_version(GlobalVar.getAppVersion());
+            device.setPlatform(platform);
+            device.setDevice_name(GlobalVar.getDeviceName());
+            deviceRepository.saveAndFlush(device);
+        }
 
         // OTP kod
         String code = String.format("%06d", secureRandom.nextInt(900000));
@@ -159,7 +169,6 @@ public class AuthServiceImpl implements AuthService {
                 .code(code)
                 .build();
     }
-
 
     @Transactional
     public LoginResponseDto verifyOtpCode(VerifyOtpRequest dto) {
@@ -186,7 +195,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Bu session allaqachon ishlatilgan!");
         }
 
-// Session ACTIVE emasmi?
+       // Session ACTIVE emasmi?
         if (session1.getSessionStatus() != SessionStatus.ACTIVE) {
             throw new RuntimeException("Session yaroqsiz!");
         }

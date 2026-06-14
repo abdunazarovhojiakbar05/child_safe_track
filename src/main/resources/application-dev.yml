@@ -20,5 +20,6 @@ spring:
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
 
+
 jwt:
-  secret: your_jwt_secret
+  secret: mySecretKeyForJwtTokenGenerationMustBe32Chars!
