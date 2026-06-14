@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://82.215.83.88:5432/child_tracking_db
+    username: your_username
+    password: your_password
+
+#  mail:
+#    username: your_mail_username
+#    password: your_mail_password
+#    from: noreply@yourdomain.com
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: qodirovxudoberdi1220@gmail.com
+    password: "qzaygqtepisytwze"
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+
+jwt:
+  secret: your_jwt_secret_min_32_chars
