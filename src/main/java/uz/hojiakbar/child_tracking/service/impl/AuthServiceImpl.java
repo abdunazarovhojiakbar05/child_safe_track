@@ -58,10 +58,10 @@ public class AuthServiceImpl implements AuthService {
 
         switch (requestDto.getTarget()) {
             case EMAIL -> {
-                String messageToEmail = messageService.sendMessageToEmail(requestDto);
+                /*String messageToEmail = messageService.sendMessageToEmail(requestDto);
                 SendOtpResponse loginWithEmail = getLoginWithEmail(requestDto.getEmail());
-                loginWithEmail.setCode(messageToEmail);
-                return loginWithEmail;
+                loginWithEmail.setCode(messageToEmail);*/
+                return getLoginWithEmail(requestDto.getEmail());
             }
             case SMS -> {
                 return getLoginWithSMS(requestDto.getEmail());
