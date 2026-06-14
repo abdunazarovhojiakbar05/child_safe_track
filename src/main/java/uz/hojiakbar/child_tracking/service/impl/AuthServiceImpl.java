@@ -93,7 +93,8 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email not valid");
         }
 
-        Users user = usersRepository.findByEmail(email);
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user == null) {
             throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
@@ -269,7 +270,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String email = jwtUtils.getUsernameFromToken(refreshToken);
-        Users user = usersRepository.findByEmail(email);
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         if (user == null) {
             throw new RuntimeException("Foydalanuvchi topilmadi!");
         }

@@ -37,7 +37,10 @@ public class FamilyRelationsServiceImpl implements FamilyRelationsService {
             throw new RuntimeException("Bu email bilan bola allaqachon mavjud!");
         }
 
-        Users parent = parentRepository.findByEmail(parentEmail);
+
+
+        Users parent = parentRepository.findByEmail(parentEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Child child = Child.builder()
                 .email(dto.getEmail())

@@ -21,7 +21,8 @@ public class UserDetailsServiceImpl implements  org.springframework.security.cor
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         // 1. Parent — email bilan
-        Users user = usersRepository.findByEmail(username);
+        Users user = usersRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         if (user != null) {
             return new CustomUserDetails(user);
         }

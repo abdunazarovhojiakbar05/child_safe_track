@@ -11,6 +11,7 @@ import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
+import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class SuperAdminController {
 
     private final SuperAdminService service;
     private final SessionRepository sessionRepository;
+    private final UsersRepository usersRepository;
 
     @GetMapping("/get_parent")
     public ResponseEntity<List<LoginResponseDto>> getAllPArent() {
@@ -48,7 +50,12 @@ public class SuperAdminController {
     }
 
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
 
+        usersRepository.deleteById(id);
+        return ResponseEntity.ok("User deleted");
+    }
 
     @GetMapping("/get_session")
     public ResponseEntity<Map<UUID, String>> getAllSession() {

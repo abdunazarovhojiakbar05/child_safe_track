@@ -43,8 +43,8 @@ public class UsersServiceImpl implements UsersService {
     @Transactional
     @Override
     public ParentData getParentData(String email) {
-        Users parent = usersRepository.findByEmail(email);
-
+        Users parent = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         List<Child> children = parent.getChildren();
 
          List<ChildData> childDataList = children.stream().map(child -> {
@@ -117,7 +117,8 @@ public class UsersServiceImpl implements UsersService {
                     );
                 }).toList());
 
-        Users parent = usersRepository.findByEmail(emailUser);
+        Users parent = usersRepository.findByEmail(emailUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         if (parent == null) {
             throw new ResourceNotFoundException("Foydalanuvchi topilmadi: " + emailUser);
         }
