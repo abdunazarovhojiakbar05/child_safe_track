@@ -10,6 +10,7 @@ import uz.hojiakbar.child_tracking.dto.response.ErrorLogResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
+import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class SuperAdminController {
 
     private final SuperAdminService service;
+    private final SessionRepository sessionRepository;
 
     @GetMapping("/get_parent")
     public ResponseEntity<List<LoginResponseDto>> getAllPArent() {
@@ -54,6 +56,13 @@ public class SuperAdminController {
     @GetMapping("/get_all_exceptions")
     public ResponseEntity<List<ErrorLogResponseDto>> getAllExceptions() {
         return ResponseEntity.ok(service.getAllExceptions());
+    }
+
+
+    @DeleteMapping("/clean-duplicate-sessions")
+    public ResponseEntity<String> cleanDuplicateSessions() {
+        sessionRepository.deleteOldDuplicateSessions();
+        return ResponseEntity.ok("Dublikat sessionlar tozalandi!");
     }
 
 }
