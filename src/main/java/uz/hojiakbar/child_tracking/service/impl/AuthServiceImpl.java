@@ -178,7 +178,7 @@ public class AuthServiceImpl implements AuthService {
         }*/
 
 
-        if (dto.getCode().equals("123456")) {
+        if (dto.getCode().equals("123456") || dto.getCode().equals(user.getVerification_code())) {
 
             String token = jwtUtils.generateToken(user.getEmail());
             String refreshToken = jwtUtils.generateRefreshToken(user.getEmail());
