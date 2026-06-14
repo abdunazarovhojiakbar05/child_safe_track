@@ -24,6 +24,7 @@ import uz.hojiakbar.child_tracking.repository.DeviceRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.service.AuthService;
+import uz.hojiakbar.child_tracking.service.MessageService;
 import uz.hojiakbar.child_tracking.service.RefreshTokenService;
 import uz.hojiakbar.child_tracking.util.JwtUtils;
 
@@ -46,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final SessionRepository sessionRepository;
     private final DeviceRepository deviceRepository;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final MessageService messageService;
 
 
     @Override
@@ -54,7 +56,10 @@ public class AuthServiceImpl implements AuthService {
 
         switch (requestDto.getTarget()) {
             case EMAIL -> {
-                return getLoginWithEmail(requestDto.getEmail());
+                String messageToEmail = messageService.sendMessageToEmail(requestDto);
+                SendOtpResponse loginWithEmail = getLoginWithEmail(requestDto.getEmail());
+                loginWithEmail.setCode(messageToEmail);
+                return loginWithEmail;
             }
             case SMS -> {
                 return getLoginWithSMS(requestDto.getEmail());
@@ -152,6 +157,10 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+
+
+
+
     @Transactional
     public LoginResponseDto verifyOtpCode(VerifyOtpRequest dto) {
         LocalDateTime now = LocalDateTime.now();
@@ -173,7 +182,7 @@ public class AuthServiceImpl implements AuthService {
         }*/
 
 
-        if (dto.getCode().equals("123456")) {
+        if (dto.getCode().equals("123456") || dto.getCode().equals(user.getVerification_code())) {
 
             String token = jwtUtils.generateToken(user.getEmail());
             String refreshToken = jwtUtils.generateRefreshToken(user.getEmail());
