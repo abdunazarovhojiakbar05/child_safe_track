@@ -9,9 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uz.hojiakbar.child_tracking.entity.Session;
+import uz.hojiakbar.child_tracking.entity.Users;
+import uz.hojiakbar.child_tracking.enums.SessionStatus;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 @Repository
 public interface SessionRepository extends JpaRepository<Session, UUID> {
     Optional<Session> findByRefreshToken(String refreshToken);
@@ -25,21 +29,23 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     Optional<Session> findByAccessToken(String accessToken);
 
-   @Modifying
-@Transactional
-@Query(value = """
-    DELETE FROM sessions
-    WHERE id NOT IN (
-            SELECT latest_id FROM (
-                    SELECT DISTINCT ON (user_id) id as latest_id
-    FROM sessions
-    ORDER BY user_id, created_at DESC
-        ) as sub
-    )   
+    @Modifying
+    @Transactional
+    @Query(value = """
+            DELETE FROM sessions
+            WHERE id NOT IN (
+                    SELECT latest_id FROM (
+                            SELECT DISTINCT ON (user_id) id as latest_id
+            FROM sessions
+            ORDER BY user_id, created_at DESC
+                ) as sub
+            )   
             """, nativeQuery = true)
-void deleteOldDuplicateSessions();
+    void deleteOldDuplicateSessions();
 
     Session findSessionByChild_Email(@NotBlank @Email String email);
 
-   Session findSessionByDeviceId(UUID deviceId);
+    Session findSessionByDeviceId(UUID deviceId);
+
+    List<Session> findByUserAndSessionStatus(Users user, SessionStatus sessionStatus);
 }

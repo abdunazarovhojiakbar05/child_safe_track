@@ -4,7 +4,8 @@ package uz.hojiakbar.child_tracking.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import uz.hojiakbar.child_tracking.enums.Platform;
+ import uz.hojiakbar.child_tracking.enums.Platform;
+import uz.hojiakbar.child_tracking.enums.SessionStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -49,6 +50,9 @@ public class Session {
 
     @Column(name = "app_version", nullable = true)
     String appVersion;
+
+    @Enumerated(EnumType.STRING)
+    SessionStatus sessionStatus = SessionStatus.ACTIVE;
 
     @Column(name = "expires_at", nullable = false)
     LocalDateTime expiresAt;

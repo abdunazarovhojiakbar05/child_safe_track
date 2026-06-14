@@ -2,13 +2,11 @@ package uz.hojiakbar.child_tracking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import uz.hojiakbar.child_tracking.config.GlobalVar;
 import uz.hojiakbar.child_tracking.dto.auth.*;
 import uz.hojiakbar.child_tracking.dto.refresh_token.RefreshTokenRequestDto;
@@ -17,6 +15,7 @@ import uz.hojiakbar.child_tracking.entity.Device;
 import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.enums.Platform;
+import uz.hojiakbar.child_tracking.enums.SessionStatus;
 import uz.hojiakbar.child_tracking.enums.UserRole;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.exception.ValidationException;
@@ -25,15 +24,12 @@ import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.repository.UsersRepository;
 import uz.hojiakbar.child_tracking.service.AuthService;
 import uz.hojiakbar.child_tracking.service.MessageService;
-import uz.hojiakbar.child_tracking.service.RefreshTokenService;
 import uz.hojiakbar.child_tracking.util.JwtUtils;
 
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -84,10 +80,8 @@ public class AuthServiceImpl implements AuthService {
         throw new RuntimeException("Telegram login not supported yet");
     }
 
-
     @Transactional
     SendOtpResponse getLoginWithEmail(String email) {
-
 
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new RuntimeException("Email not valid");
@@ -96,16 +90,12 @@ public class AuthServiceImpl implements AuthService {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user == null) {
-            throw new ResourceNotFoundException("Foydalanuvchi topilmadi!");
-        }
-
+        // Validation
         String rawDeviceIdStr = GlobalVar.getDeviceId();
         if (rawDeviceIdStr == null || rawDeviceIdStr.isBlank()) {
             throw new ValidationException("X-Device-ID header majburiy!");
         }
         UUID deviceID = UUID.fromString(rawDeviceIdStr);
-
 
         String rawPlatformStr = GlobalVar.getPlatform();
         if (rawPlatformStr == null || rawPlatformStr.isBlank()) {
@@ -113,55 +103,62 @@ public class AuthServiceImpl implements AuthService {
         }
         Platform platform = Platform.valueOf(rawPlatformStr);
 
+        // Active session soni tekshirish
+        List<Session> activeSessions = sessionRepository
+                .findByUserAndSessionStatus(user, SessionStatus.ACTIVE);
+        if (activeSessions.size() >= 3) {
+            activeSessions.stream()
+                    .min(Comparator.comparing(Session::getCreatedAt))
+                    .ifPresent(oldest -> {
+                        oldest.setSessionStatus(SessionStatus.EXPIRED);
+                        oldest.setIsActive(false);
+                        sessionRepository.save(oldest);
+                    });
+        }
 
-        Optional<Session> optional = Optional.ofNullable(sessionRepository.findSessionByDeviceId(deviceID));
-        Session session2 = optional.orElseGet(() -> {
-            Session session = new Session();
-            session.setDeviceId(deviceID);
-            session.setUser(user);
-            session.setCreatedAt(LocalDateTime.now());
-            session.setExpiresAt(LocalDateTime.now().plusDays(7));
-            session.setDeviceName(GlobalVar.getDeviceName());
-            session.setPlatform(platform);
-            session.setAppVersion(GlobalVar.getAppVersion());
-            session.setRevokedAt(null);
-            sessionRepository.save(session);
+        // Session topish yoki yaratish
+        Session session = Optional.ofNullable(
+                        sessionRepository.findSessionByDeviceId(deviceID))
+                .orElseGet(() -> {
+                    Session s = new Session();
+                    s.setDeviceId(deviceID);
+                    s.setUser(user);
+                    s.setDeviceName(GlobalVar.getDeviceName());
+                    s.setCreatedAt(LocalDateTime.now());
+                    return s;
+                });
 
-            return session;
-        });
+        // Har doim yangilash
+        session.setSessionStatus(SessionStatus.ACTIVE);
+        session.setIsActive(true);
+        session.setAccessToken(null);
+        session.setRefreshToken(null);
+        session.setRevokedAt(null);
+        session.setPlatform(platform);
+        session.setAppVersion(GlobalVar.getAppVersion());
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+        sessionRepository.save(session);
 
+        // Device yangilash
         Device device = deviceRepository.findById(deviceID).orElse(new Device());
-
+        device.setId(deviceID);
         device.setUser(user);
         device.setApp_version(GlobalVar.getAppVersion());
         device.setPlatform(platform);
         device.setDevice_name(GlobalVar.getDeviceName());
         deviceRepository.save(device);
 
-
-
-        String code = String.format("%06d", secureRandom.nextInt(900000)  );
-
+        // OTP kod
+        String code = String.format("%06d", secureRandom.nextInt(900000));
         user.setVerification_code(code);
         user.setCode_generated_at(LocalDateTime.now());
         usersRepository.save(user);
 
-        session2.setAppVersion(GlobalVar.getAppVersion());
-        session2.setPlatform(platform);
-        sessionRepository.save(session2);
-
-
-       // sendEmail(user.getEmail(), code);
-
         return SendOtpResponse.builder()
-                .session_id(session2.getId())
+                .session_id(session.getId())
                 .code(code)
                 .build();
-
     }
-
-
-
 
 
     @Transactional
@@ -184,6 +181,16 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kod yaroqsiz yoki muddati o'tgan!");
         }*/
 
+        // Session allaqachon ishlatilganmi?
+        if (session1.getSessionStatus() == SessionStatus.VERIFIED) {
+            throw new RuntimeException("Bu session allaqachon ishlatilgan!");
+        }
+
+// Session ACTIVE emasmi?
+        if (session1.getSessionStatus() != SessionStatus.ACTIVE) {
+            throw new RuntimeException("Session yaroqsiz!");
+        }
+
 
         if (dto.getCode().equals("123456") || dto.getCode().equals(user.getVerification_code())) {
 
@@ -198,6 +205,8 @@ public class AuthServiceImpl implements AuthService {
             session1.setRefreshToken(refreshToken);
             session1.setCreatedAt(LocalDateTime.now());
             session1.setExpiresAt(LocalDateTime.now().plusDays(7));
+            session1.setSessionStatus(SessionStatus.VERIFIED);
+            session1.setIsActive(true);
             session1.setRevokedAt(null);
 
             sessionRepository.save(session1);
@@ -309,7 +318,8 @@ public class AuthServiceImpl implements AuthService {
 
         Session session = sessionRepository.findByAccessToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Session topilmadi"));
-
+        session.setIsActive(false);
+        session.setSessionStatus(SessionStatus.EXPIRED);
         session.setAccessToken(null);
         session.setRefreshToken(null);
         session.setRevokedAt(LocalDateTime.now());
