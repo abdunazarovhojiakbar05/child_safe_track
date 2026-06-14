@@ -49,8 +49,7 @@ public class Device {
     @Column(nullable = true)
     String os_version;
 
-    @Column(nullable = false)
-    String app_version;
+
 
     Timestamp last_seen_at;
 

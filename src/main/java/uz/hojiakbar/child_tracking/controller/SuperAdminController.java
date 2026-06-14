@@ -14,6 +14,7 @@ import uz.hojiakbar.child_tracking.repository.SessionRepository;
 import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -48,7 +49,7 @@ public class SuperAdminController {
 
 
     @GetMapping("/get_session")
-    public ResponseEntity<List<Session>> getAllSession() {
+    public ResponseEntity<Map<UUID, String>> getAllSession() {
        return ResponseEntity.ok(service.getAllSession());
     }
 

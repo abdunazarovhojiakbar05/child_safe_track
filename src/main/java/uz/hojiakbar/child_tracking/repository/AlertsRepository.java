@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.hojiakbar.child_tracking.entity.Alerts;
+import uz.hojiakbar.child_tracking.entity.Users;
 import uz.hojiakbar.child_tracking.enums.Alert_Type;
 
 import java.time.LocalDate;
@@ -45,4 +46,8 @@ public interface AlertsRepository extends JpaRepository<Alerts, UUID> {
             @Param("childId") UUID childId,
             @Param("date") LocalDate date
     );
+
+    @Query(value = "SELECT COUNT(*) FROM alerts WHERE parent_id = :parentId AND is_read = false",
+            nativeQuery = true)
+    int countUnreadByUsers(@Param("parentId") UUID parentId);
 }

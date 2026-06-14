@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public interface UsersService {
 
+    ParentData getParentData(String email);
+
     ParentDashboardResponseDto getParentDashboard(String userDetails);
 
     List< ChildListResponseDto>   getChildrenByParentEmail(String email);

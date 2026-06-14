@@ -9,6 +9,7 @@ import uz.hojiakbar.child_tracking.dto.response.AlertResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.GeofenceResponseDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.*;
+import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.*;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +35,55 @@ public class UsersServiceImpl implements UsersService {
     private final LocationsRepository locationsRepository;
     private final GeofencesRepository geofencesRepository;
     private final AlertsRepository alertsRepository;
+    private final AlertsRepository alertRepository;
 
     private final DeviceRepository deviceRepository;
+
+
+    @Transactional
+    @Override
+    public ParentData getParentData(String email) {
+        Users parent = usersRepository.findByEmail(email);
+
+        List<Child> children = parent.getChildren();
+
+         List<ChildData> childDataList = children.stream().map(child -> {
+            Device childDevice =  deviceRepository.findLatestByChild(child).orElse(null);
+
+            return ChildData.builder()
+                    .id(child.getId())
+                    .full_name(child.getFull_name())
+                    .email(child.getEmail())
+                    .phone(child.getPhone())
+                    .status(child.getVerified())
+                    .is_online(childDevice != null && childDevice.isActive())
+                    .child_device(childDevice == null ? null : DeviceResponseDto.builder()
+                            .platform(childDevice.getPlatform())
+                            .model(childDevice.getDevice_model())
+                            .os_version(childDevice.getOs_version())
+                            .build())
+                    .build();
+        }).collect(Collectors.toList());
+
+        Device parentDevice =  deviceRepository.findLatestByUser(parent).orElse(null);
+
+        return ParentData.builder()
+                .total_children(children.size())
+                .active_children((int) children.stream()
+                        .filter(c -> c.getVerified() == Status.ACTIVE || c.getVerified() == Status.ACCEPTED)
+                        .count())
+                .pending_children((int) children.stream()
+                        .filter(c -> c.getVerified() == Status.PENDING || c.getVerified() == Status.NOT_VERIFIED)
+                        .count())
+                .unread_alerts(alertRepository.countUnreadByUsers(parent.getId()))
+                .children(childDataList)
+                .parent_device(parentDevice == null ? null : DeviceResponseDto.builder()
+                        .platform(parentDevice.getPlatform())
+                        .model(parentDevice.getDevice_name())
+                        .os_version(parentDevice.getOs_version())
+                        .build())
+                .build();
+    }
 
 
     @Override

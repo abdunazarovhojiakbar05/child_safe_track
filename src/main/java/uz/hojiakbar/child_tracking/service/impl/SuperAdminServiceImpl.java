@@ -21,7 +21,9 @@ import uz.hojiakbar.child_tracking.service.SuperAdminService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,9 +103,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return "User activated successfully";
     }
 
+
     @Override
-    public List<Session> getAllSession() {
-        return sessionRepository.findAll();
+    public Map<UUID, String> getAllSession() {
+        List<Session> list = sessionRepository.findAll();
+        return list.stream()
+                .filter(s -> s.getId() != null)
+                .collect(Collectors.toMap(
+                        Session::getId,
+                        s -> s.getDeviceName() != null ? s.getDeviceName() : "Noma'lum qurilma"
+                ));
     }
 
     @Override

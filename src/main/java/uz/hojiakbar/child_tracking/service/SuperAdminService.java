@@ -8,6 +8,7 @@ import uz.hojiakbar.child_tracking.entity.Session;
 import uz.hojiakbar.child_tracking.entity.Users;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface SuperAdminService {
@@ -20,7 +21,7 @@ public interface SuperAdminService {
 
     String activeUser(UUID userId);
 
-    List<Session> getAllSession();
+    Map<UUID, String> getAllSession();
 
     List<ErrorLogResponseDto> getAllExceptions();
 }

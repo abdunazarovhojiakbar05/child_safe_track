@@ -32,6 +32,16 @@ public class ParentController {
         return ResponseEntity.ok(parentService.getParentDashboard(email));
     }
 
+
+    @GetMapping("/data")
+    @Operation(summary = "Parent va bolalar ma'lumotlari")
+    public ResponseEntity<ParentData> getParentData(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(parentService.getParentData(userDetails.getUsername()));
+    }
+
+
+
     @PostMapping("/manage_child")
     @Operation(summary = "bolani qoshayotganda faqatgina ism va email beriladi")
     public ResponseEntity<String>  manage_child (
