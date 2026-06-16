@@ -1,5 +1,17 @@
 package uz.hojiakbar.child_tracking.enums;
 
 public enum Activity_Type {
-    MOVEMENT, APP_USAGE, SCREEN_TIME, LOCATION_CHANGE, CHARGING
+    GEOFENCE_ENTERED,
+    GEOFENCE_EXITED,
+    LOCATION_UPDATED,
+
+
+    BATTERY_LOW,
+    BATTERY_CRITICAL,
+    CHARGING_STARTED,
+    CHARGING_STOPPED,
+    DEVICE_OFFLINE,
+    DEVICE_ONLINE,
+
+    SOS_TRIGGERED,
 }

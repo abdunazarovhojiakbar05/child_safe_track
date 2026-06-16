@@ -3,12 +3,16 @@ package uz.hojiakbar.child_tracking.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.hojiakbar.child_tracking.config.GlobalVar;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterChildRequestDto;
 import uz.hojiakbar.child_tracking.dto.childDto.RegisterResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Family_Relations;
 import uz.hojiakbar.child_tracking.entity.Session;
+import uz.hojiakbar.child_tracking.enums.Platform;
 import uz.hojiakbar.child_tracking.enums.Status;
+import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
+import uz.hojiakbar.child_tracking.exception.ValidationException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.FamilyRelationsRepository;
 import uz.hojiakbar.child_tracking.repository.SessionRepository;
@@ -17,7 +21,6 @@ import uz.hojiakbar.child_tracking.util.JwtUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -36,25 +39,24 @@ public class ChildServiceImpl implements ChildService {
 
         String email = request.getEmail();
 
-         Child child = childRepository.findByEmail(email);
+        Child child = childRepository.findByEmail(email);
         if (child == null) {
-            throw new RuntimeException("Child topilmadi: " + email);
+            throw new ResourceNotFoundException("bola topilmadi: " + email);
         }
 
-         Family_Relations relations = familyRelationsRepository
+        Family_Relations relations = familyRelationsRepository
                 .findByChildEmail(email)
-                .orElseThrow(() -> new RuntimeException("Family_Relations topilmadi: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Family_Relations topilmadi: " + email));
 
-         if (relations.getParent() == null) {
+        if (relations.getParent() == null) {
             throw new RuntimeException("Parent bog'lanmagan! generateInviteCode da xato bor.");
         }
 
-         child.setPhone(request.getPhone());
+        child.setPhone(request.getPhone());
         child.setGender(request.getGender());
-        child.setDate_of_birth(request.getDatedOfBirth());
+        child.setDate_of_birth(request.getDated_of_birth());
         child.setVerified(Status.ACTIVE);
         child.setIsActive(true);
-
 
         if (child.getParents() == null) {
             child.setParents(new ArrayList<>());
@@ -65,25 +67,45 @@ public class ChildServiceImpl implements ChildService {
         }
         childRepository.save(child);
 
-         String accessToken = jwtUtils.generateToken(child.getEmail());
+        String accessToken  = jwtUtils.generateToken(child.getEmail());
         String refreshToken = jwtUtils.generateRefreshToken(child.getEmail());
 
-         Session session = Session.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .child(child)
-                .ipAddress("unknown")
-                .userAgent("unknown")
-                .deviceId(UUID.randomUUID())
-                .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(7))
-                .build();
+        Session session = sessionRepository.findSessionByChild_Email(request.getEmail());
+        if (session == null) {
+            session = new Session();
+        }
+
+
+        String rawDeviceIdStr = GlobalVar.getDeviceId();
+        if (rawDeviceIdStr == null || rawDeviceIdStr.isBlank()) {
+            throw new ValidationException("X-Device-ID header majburiy!");
+        }
+        UUID deviceID = UUID.fromString(rawDeviceIdStr);
+
+        String rawPlatformStr = GlobalVar.getPlatform();
+        if (rawPlatformStr == null || rawPlatformStr.isBlank()) {
+            throw new ValidationException("X-Platform header majburiy!");
+        }
+        Platform platform = Platform.valueOf(rawPlatformStr);
+
+
+        session.setDeviceId(deviceID);
+        session.setIpAddress(GlobalVar.getDeviceName());
+        session.setPlatform(platform);
+        session.setAppVersion(GlobalVar.getAppVersion());
+        session.setAccessToken(accessToken);
+        session.setRefreshToken(refreshToken);
+        session.setChild(child);
+        session.setCreatedAt(LocalDateTime.now());
+        session.setRevokedAt(null);
+        session.setExpiresAt(LocalDateTime.now().plusDays(7));
+
         sessionRepository.save(session);
 
         return RegisterResponseDto.builder()
                 .child_id(child.getId())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .access_token(accessToken)
+                .refresh_token(refreshToken)
                 .parent_id(relations.getParent().getId())
                 .build();
     }

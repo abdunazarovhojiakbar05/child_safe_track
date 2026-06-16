@@ -1,9 +1,9 @@
 package uz.hojiakbar.child_tracking.dto.childDto;
 
+import jakarta.persistence.JoinColumn;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import uz.hojiakbar.child_tracking.entity.Child;
 import java.util.UUID;
 
 @Getter
@@ -18,8 +18,10 @@ public class RegisterResponseDto {
 
     UUID parent_id;
 
-    String accessToken;
+    @JoinColumn(name = "access_token")
+    String access_token;
 
-    String refreshToken;
+    @JoinColumn(name = "refresh_token")
+    String refresh_token;
 
 }

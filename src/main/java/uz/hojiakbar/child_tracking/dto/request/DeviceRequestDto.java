@@ -1,11 +1,14 @@
 package uz.hojiakbar.child_tracking.dto.request;
 
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.hojiakbar.child_tracking.enums.Platform;
+
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -13,13 +16,13 @@ import uz.hojiakbar.child_tracking.enums.Platform;
 @NoArgsConstructor
 public class DeviceRequestDto {
 
-    private String device_token;
+    private UUID id;
 
-    private Platform platform;
+    private String platform;
 
-    private String device_model;
+    @JoinColumn(name = "device_model")
+    private String deviceModel;
 
-    private String os_version;
-
-    private String app_version;
+    @JoinColumn(name = "app_version")
+    private String appVersion;
 }

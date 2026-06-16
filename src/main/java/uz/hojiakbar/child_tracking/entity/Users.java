@@ -6,10 +6,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import uz.hojiakbar.child_tracking.enums.Gender;
+import uz.hojiakbar.child_tracking.enums.Status;
 import uz.hojiakbar.child_tracking.enums.UserRole;
 
 import java.time.LocalDateTime;
@@ -32,13 +30,22 @@ public class Users {
     UUID id;
 
     @Column(name = "fcm_token")
-    String fcmToken;
+    String fcm_token;
 
-    @Column(unique = true)
+
     String verification_code;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "family_relations",
+            joinColumns = @JoinColumn(name = "parent_id"),
+            inverseJoinColumns = @JoinColumn(name = "child_id")
+    )
     List<Child> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Device> devices = new ArrayList<>();
+
 
     LocalDateTime code_generated_at;
 
@@ -51,13 +58,13 @@ public class Users {
     @Column(unique = true)
     String phone;
 
-    @Column(unique = true, nullable = false)
-    String password_hash;
 
     @Column(nullable = false)
     String full_name;
 
     String avatar_url;
+
+    Status status;
 
 
     Date date_of_birth;
@@ -73,7 +80,6 @@ public class Users {
 
     @UpdateTimestamp
     LocalDateTime updated_at;
-
 
 
 }

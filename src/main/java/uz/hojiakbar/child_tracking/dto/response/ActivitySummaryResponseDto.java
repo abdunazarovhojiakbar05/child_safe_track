@@ -1,6 +1,7 @@
 package uz.hojiakbar.child_tracking.dto.response;
 
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +15,11 @@ public class ActivitySummaryResponseDto {
 
     Double distance ;
 
-    Double placesVisited;
+    @JoinColumn(name = "places_visited")
+    Double places_visited;
 
-    int screenTimeMin;
+    @JoinColumn(name = "screen_time_min")
+    int screen_time_min;
 
 
 }

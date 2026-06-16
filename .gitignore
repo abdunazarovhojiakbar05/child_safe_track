@@ -1,5 +1,6 @@
-src/main/resources/application.properties
+src/main/resources/application.yaml
+src/main/resources/firebase-service-account.json
 target/
 .idea/
 *.iml
-src/main/resources/firebase-service-account.json
+.env

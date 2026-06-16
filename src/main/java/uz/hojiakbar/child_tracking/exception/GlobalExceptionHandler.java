@@ -1,30 +1,42 @@
 package uz.hojiakbar.child_tracking.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+import uz.hojiakbar.child_tracking.entity.ErrorLog;
+import uz.hojiakbar.child_tracking.repository.ErrorLogRepository;
+import uz.hojiakbar.child_tracking.security.CustomUserDetails;
 
- import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
-
+import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    // 404 - Resource topilmadi
+    private final ErrorLogRepository errorLogRepository;
+
+    // 404
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
-    // 400 - Validation xatolik
+    // 400 - Validation (@Valid annotatsiyasi)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -32,32 +44,62 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .findFirst()
-                .orElse("Validation failed");
+                .orElse("Validation xatosi");
         return build(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
     }
 
-    // 403 - Access denied (Spring Security)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(
-            AccessDeniedException ex, HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "Access denied", request.getRequestURI());
+    // 400 - Bad request (qo'lda tashlanadigan)
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(
+            BadRequestException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
     }
 
-    // 401 - Unauthorized
+    // 400 - Validation exception
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationEx(
+            ValidationException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    }
+
+    // 401 - Unauthorized (qo'lda)
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedEx(
+            UnauthorizedException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI());
+    }
+
+    // 401 - Spring Security
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             AuthenticationException ex, HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, "Unauthorized", request.getRequestURI());
+        return build(HttpStatus.UNAUTHORIZED, "Token yaroqsiz yoki muddati o'tgan", request.getRequestURI());
     }
 
-    // 500 - Boshqa barcha xatoliklar
+    // 403 - Forbidden
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+        return build(HttpStatus.FORBIDDEN, "Ruxsat yo'q", request.getRequestURI());
+    }
+
+    // 400 - ResponseStatusException (Spring ning o'zi tashlaydigan)
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatus(
+            ResponseStatusException ex, HttpServletRequest request) {
+        return build(HttpStatus.valueOf(ex.getStatusCode().value()),
+                ex.getReason(), request.getRequestURI());
+    }
+
+    // 500 - Qolgan hamma xatolik
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(
-            Exception ex, HttpServletRequest request) {
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI());
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex, HttpServletRequest request) {
+        ex.printStackTrace();
+        return build(HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                request.getRequestURI());
     }
 
-    // Helper method
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message, String path) {
         ErrorResponse response = ErrorResponse.builder()
                 .status(status.value())
@@ -66,6 +108,37 @@ public class GlobalExceptionHandler {
                 .path(path)
                 .timestamp(LocalDateTime.now())
                 .build();
+
+        try {
+            ErrorLog log = new ErrorLog();
+            log.setError_message(message);
+            log.setPath(path);
+            log.setStatus(status.value());
+            log.setCreated_at(LocalDateTime.now());
+            log.setUser_id(getCurrentUserId());
+
+            errorLogRepository.save(log);
+
+
+        } catch (Exception e) {
+            System.err.println("Xatolikni bazaga yozishda xato bo'ldi: " + e.getMessage());
+        }
         return ResponseEntity.status(status).body(response);
+    }
+
+
+    private UUID getCurrentUserId() {
+        try {
+             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication != null && authentication.isAuthenticated()
+                    && !(authentication instanceof AnonymousAuthenticationToken)) {
+
+                 CustomUserDetails principal = (CustomUserDetails    ) authentication.getPrincipal();
+                return principal.getId();
+            }
+        } catch (Exception e) {
+         }
+        return null;
     }
 }

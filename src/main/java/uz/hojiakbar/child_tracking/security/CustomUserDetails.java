@@ -20,6 +20,7 @@ import java.util.UUID;
  *   - Child  (bola, CHILD)
  *
  * Controller da ishlatish:
+ *
  *   @AuthenticationPrincipal CustomUserDetails userDetails
  *
  *   userDetails.getUsers()   → Users  obyektini olish (null bo'lishi mumkin)
@@ -30,14 +31,12 @@ import java.util.UUID;
  */
 public class CustomUserDetails implements UserDetails {
 
-    // Asl entity lar — ikkalasi ham nullable, bittasi to'ldiriladi
     @Getter
     private final Users users;
 
     @Getter
     private final Child child;
 
-    // ─── Constructorlar ───────────────────────────────────────────────
 
     public CustomUserDetails(Users users) {
         this.users = users;
@@ -49,7 +48,6 @@ public class CustomUserDetails implements UserDetails {
         this.users = null;
     }
 
-    // ─── Qulaylik metodlari ───────────────────────────────────────────
 
     /** Kim ekanligini bilmasdan UUID olish */
     public UUID getId() {
@@ -74,25 +72,23 @@ public class CustomUserDetails implements UserDetails {
         return UserRole.CHILD;
     }
 
-    // ─── UserDetails interface metodlari ─────────────────────────────
 
     @Override
     public String getUsername() {
         if (isParent()) return users.getEmail();
-        // invite holatida phone null, email ishlatamiz
-        return (child.getPhone() != null) ? child.getPhone() : child.getEmail();
+         return (child.getPhone() != null) ? child.getPhone() : child.getEmail();
     }
-    @Override
-    public String getPassword() {
-        return isParent()
-                ? (users.getPassword_hash() != null ? users.getPassword_hash() : "")
-                : null;
-    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = isParent() ? users.getRole().name() : UserRole.CHILD.name();
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
     }
 
     @Override

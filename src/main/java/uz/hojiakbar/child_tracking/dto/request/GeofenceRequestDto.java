@@ -1,5 +1,6 @@
 package uz.hojiakbar.child_tracking.dto.request;
 
+import jakarta.persistence.JoinColumn;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -23,18 +24,23 @@ public class GeofenceRequestDto {
     private String name;
 
     @NotNull
+    @JoinColumn(name = "center_lat")
     private Double centerLat;
 
     @NotNull
+    @JoinColumn(name = "center_lon")
     private Double centerLon;
 
     @NotNull
+    @JoinColumn(name = "radius_metres")
     private Double radiusMetres;
 
-    private Geofences_Type type; // SAFE, DANGER
+    private Geofences_Type type;
 
+    @JoinColumn(name = "notify_on_enter")
     private Boolean notifyOnEnter = true;
 
+    @JoinColumn(name = "notify_on_exit")
     private Boolean notifyOnExit = true;
 
 }

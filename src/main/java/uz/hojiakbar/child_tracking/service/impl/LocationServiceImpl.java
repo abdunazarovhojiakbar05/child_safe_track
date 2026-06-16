@@ -1,22 +1,31 @@
 package uz.hojiakbar.child_tracking.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import uz.hojiakbar.child_tracking.dto.request.LocationRequestDto;
 import uz.hojiakbar.child_tracking.dto.response.LocationResponseDto;
 import uz.hojiakbar.child_tracking.entity.Child;
 import uz.hojiakbar.child_tracking.entity.Geofences;
 import uz.hojiakbar.child_tracking.entity.Locations;
+import uz.hojiakbar.child_tracking.enums.Activity_Type;
+import uz.hojiakbar.child_tracking.exception.ResourceNotFoundException;
 import uz.hojiakbar.child_tracking.repository.ChildRepository;
 import uz.hojiakbar.child_tracking.repository.GeofencesRepository;
 import uz.hojiakbar.child_tracking.repository.LocationsRepository;
 import uz.hojiakbar.child_tracking.security.CustomUserDetails;
+import uz.hojiakbar.child_tracking.service.ActivitiesService;
 import uz.hojiakbar.child_tracking.service.LocationService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,12 +37,14 @@ public class LocationServiceImpl implements LocationService {
     private final LocationsRepository locationsRepository;
     private final ChildRepository childRepository;
     private final GeofencesRepository geofencesRepository;
-    private final NotificationService notificationService;
+    private final NotificationService1 notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ActivitiesService activitiesService;
 
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double R = 6371e3; /// yer radiusi ekan
+        double R = 6371e3;
         double phi1 = Math.toRadians(lat1);
         double phi2 = Math.toRadians(lat2);
         double deltaPhi = Math.toRadians(lat2 - lat1);
@@ -48,23 +59,22 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) {
 
+    public void saveLocation(CustomUserDetails userDetails, LocationRequestDto dto) throws BadRequestException {
         Child child = userDetails.getChild();
 
         if (child == null) {
-            throw new RuntimeException("faqat bolangiz location yuborishis mumkin");
+            throw new BadRequestException("faqat bolangiz location yuborishis mumkin");
         }
 
-
-        Child menageChild = childRepository.findById(child.getId()).orElseThrow(() -> new RuntimeException("child not found"));
+        Child menageChild = childRepository.findById(child.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("child not found"));
 
         LocalDateTime recordedAt = dto.getTimestamp() != null
                 ? LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(dto.getTimestamp()),
                 ZoneId.systemDefault())
                 : LocalDateTime.now();
-
 
         Locations locations = Locations.builder()
                 .child(menageChild)
@@ -79,41 +89,108 @@ public class LocationServiceImpl implements LocationService {
 
         locationsRepository.save(locations);
 
-        checkGeofence(child, dto.getLatitude(), dto.getLongitude());
+// Battery holati
+        if (dto.getBatteryLevel() != null) {
+            if (dto.getBatteryLevel() <= 5) {
+                activitiesService.save(menageChild, Activity_Type.BATTERY_CRITICAL,
+                        "Batareya kritik", "Batareya darajasi: " + dto.getBatteryLevel() + "%",
+                        null, null, 0, null);
+            } else if (dto.getBatteryLevel() <= 20) {
+                activitiesService.save(menageChild, Activity_Type.BATTERY_LOW,
+                        "Batareya kam", "Batareya darajasi: " + dto.getBatteryLevel() + "%",
+                        null, null, 0, null);
+            }
+        }
 
+        LocationResponseDto locationResponseDto = toDto(locations);
+        messagingTemplate.convertAndSend(
+                "/topic/locations/" + child.getId(),
+                locationResponseDto
+        );
+
+         Locations lastLocation = locationsRepository
+                .findLastByChildId(menageChild.getId())
+                .orElse(null);
+
+        if (lastLocation == null || calculateDistance(
+                dto.getLatitude(), dto.getLongitude(),
+                lastLocation.getLatitude().doubleValue(),
+                lastLocation.getLongitude().doubleValue()) > 25) {
+
+            activitiesService.save(
+                    menageChild,
+                    Activity_Type.LOCATION_UPDATED,
+                    "Lokatsiya yangilandi",
+                    null,
+                    BigDecimal.valueOf(dto.getLatitude()),
+                    BigDecimal.valueOf(dto.getLongitude()),
+                    0, null
+            );
+        }
+
+        checkGeofence(child, dto.getLatitude(), dto.getLongitude());
     }
 
 
-    private void checkGeofence(Child child, double lat, double lng) {
+  /**
+     * ws://your-domain.com/ws
+       subscribe: /topic/location/{childId}
+     */
 
+    @Override
+    public void checkGeofence(Child child, double lat, double lng) {
         List<Geofences> geofences = geofencesRepository.findActiveByChildId(child.getId());
 
-        for (var geofence : geofences) {
+        List<Geofences> toUpdate = new ArrayList<>();
+
+        for (Geofences geofence : geofences) {
             double distance = calculateDistance(lat, lng,
-                    geofence.getCenterLat().doubleValue()
-                    , geofence.getCenterLon().doubleValue()
-            );
+                    geofence.getCenterLat().doubleValue(),
+                    geofence.getCenterLon().doubleValue());
 
+            boolean insideNow = distance <= geofence.getRadiusMetres().doubleValue();
+            Boolean wasInside = geofence.getLastKnownInside();
 
-            boolean insideGeofence = distance <= geofence.getRadiusMetres().doubleValue();
+            if (wasInside == null || wasInside != insideNow) {
+                if (!insideNow) {
+                    // Activity har doim saqlanadi
+                    activitiesService.save(child, Activity_Type.GEOFENCE_EXITED,
+                            "Xavfsiz hududdan chiqdi", geofence.getName(),
+                            geofence.getCenterLat(), geofence.getCenterLon(), 0, null);
 
-            if (!insideGeofence && geofence.isNotifyOnExit()) {
-                // ✅ Real notification
-                notificationService.sendNotification(
-                        geofence.getCreatedBy().getFcmToken(),
-                        "⚠️ Xavfsiz hudud",
-                        child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
-                );
+                    // Notification faqat yoqilgan bo'lsa
+                    if (geofence.isNotifyOnExit()) {
+                        notificationService.sendNotification(
+                                geofence.getCreatedBy().getFcm_token(),
+                                "⚠️ Xavfsiz hudud",
+                                child.getFull_name() + " xavfsiz hududdan chiqdi: " + geofence.getName()
+                        );
+                    }
+                }
+                if (insideNow) {
+                    // Activity har doim saqlanadi
+                    activitiesService.save(child, Activity_Type.GEOFENCE_ENTERED,
+                            "Xavfsiz hududga kirdi", geofence.getName(),
+                            geofence.getCenterLat(), geofence.getCenterLon(), 0, null);
+
+                    // Notification faqat yoqilgan bo'lsa
+                    if (geofence.isNotifyOnEnter()) {
+                        notificationService.sendNotification(
+                                geofence.getCreatedBy().getFcm_token(),
+                                "✅ Xavfsiz hudud",
+                                child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
+                        );
+                    }
+                }
+                geofence.setLastKnownInside(insideNow);
+                toUpdate.add(geofence);
             }
-            if (insideGeofence && geofence.isNotifyOnEnter()) {
-                // ✅ Real notification
-                notificationService.sendNotification(
-                        geofence.getCreatedBy().getFcmToken(),
-                        "✅ Xavfsiz hudud",
-                        child.getFull_name() + " xavfsiz hududga kirdi: " + geofence.getName()
-                );
-            }
+
         }
+                if (!toUpdate.isEmpty()) {
+                    geofencesRepository.saveAll(toUpdate);
+                }
+
 
     }
 
@@ -122,7 +199,7 @@ public class LocationServiceImpl implements LocationService {
         return locationsRepository
                 .findLastByChildId(childId)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Hali location yuborilmagan!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Hali location yuborilmagan!"));
     }
 
     @Override
@@ -134,16 +211,26 @@ public class LocationServiceImpl implements LocationService {
                 .toList();
     }
 
+    @Override
+    public Page<LocationResponseDto> getRouteHistory(UUID childId, int page, int size) {
+        LocalDateTime fifteenDaysAgo = LocalDateTime.now().minusDays(15);
+        Pageable pageable = PageRequest.of(page, size);
+
+        return locationsRepository
+                .findByChildIdAndRecordedAtAfter(childId, fifteenDaysAgo, pageable)
+                .map(this::toDto);
+    }
+
     private LocationResponseDto toDto(Locations loc) {
         LocationResponseDto dto = new LocationResponseDto();
         dto.setLatitude(loc.getLatitude());
         dto.setLongitude(loc.getLongitude());
         dto.setSpeed(loc.getSpeed());
         dto.setAccuracy(loc.getAccuracy());
-        dto.setBatteryLevel(loc.getBattery_level());
-        dto.setIsCharging(loc.isCharging());
-        dto.setRecordedAt(loc.getRecorded_at());
-        dto.setCreatedAt(loc.getCreated_at());
+        dto.setBattery_level(loc.getBattery_level());
+        dto.setIs_charging(loc.isCharging());
+        dto.setRecorded_at(loc.getRecorded_at());
+        dto.setCreated_at(loc.getCreated_at());
         dto.setAddress(null); ///TODO keyinroq reverse geocoding
         return dto;
     }

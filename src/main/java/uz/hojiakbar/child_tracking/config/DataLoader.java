@@ -19,7 +19,7 @@ import java.util.Date;
 public class DataLoader implements CommandLineRunner {
 
     private final UsersRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public void run(String... args) {
@@ -29,8 +29,7 @@ public class DataLoader implements CommandLineRunner {
                     .full_name("Hojiakbar Admin")
                     .phone("+998901234567")
                     .email("abdunazarovhojiakbar05@gmail.com")
-                    .password_hash(passwordEncoder.encode("Admin123!"))
-                    .role(UserRole.ADMIN)
+                     .role(UserRole.ADMIN)
                     .gender(Gender.MALE)
                     .date_of_birth(new  Date())
                     .isActive(true)
@@ -48,8 +47,7 @@ public class DataLoader implements CommandLineRunner {
                      .full_name("Lutfulla Torayev")
                      .phone("+998332080636")
                      .email("kalibrimalik007@gmail.com")
-                     .password_hash(passwordEncoder.encode("User123!"))
-                     .role(UserRole.PARENT)
+                      .role(UserRole.PARENT)
                      .gender(Gender.MALE)
                      .date_of_birth(new Date())
                      .isActive(true)

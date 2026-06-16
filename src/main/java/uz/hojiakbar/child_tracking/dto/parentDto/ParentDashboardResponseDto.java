@@ -1,5 +1,6 @@
 package uz.hojiakbar.child_tracking.dto.parentDto;
 
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +19,15 @@ import java.util.List;
 public class ParentDashboardResponseDto {
 
     private SummaryResponseDto summary;
+
     private List<ChildDashboardDto> children;
+
     private List<GeofenceResponseDto> geofences;
+
+    @JoinColumn(name = "daily_activity_summary")
     private List<ActivitySummaryResponseDto> dailyActivitySummary;
+
+    @JoinColumn(name = "recent_alerts")
     private List<AlertResponseDto> recentAlerts;
 
 }

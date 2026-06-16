@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
+import uz.hojiakbar.child_tracking.enums.OtpTarget;
+import uz.hojiakbar.child_tracking.enums.Role;
 
 @Getter
 @Setter
@@ -16,6 +18,7 @@ import uz.hojiakbar.child_tracking.dto.request.DeviceRequestDto;
 @NoArgsConstructor
 @Builder
 public class RegistrationRequestDto {
+
     @NotBlank(message = "Ism bo'sh bo'lmasligi kerak")
     private String full_name;
 
@@ -29,15 +32,7 @@ public class RegistrationRequestDto {
     @Pattern(regexp = "^\\+998\\d{9}$", message = "Telefon raqami noto'g'ri. Masalan: +998901234567")
     private String phone;
 
-    @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-            message = "Parol kamida 8 ta belgi, 1 ta katta harf, 1 ta raqam va 1 ta maxsus belgidan iborat bo'lishi kerak"
-    )
+    private OtpTarget target;
 
-    @Column(nullable = false)
-    @Size(min = 8, message = "Parol kamida 8 ta belgi bo'lishi kerak")
-    private String password;
 
-    @Valid
-    private DeviceRequestDto device;
 }

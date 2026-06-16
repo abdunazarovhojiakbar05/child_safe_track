@@ -16,12 +16,19 @@ import java.util.UUID;
 public class ChildDashboardDto {
 
     private UUID id;
-    private String fullName;
-    private String avatarUrl;
-    private boolean isOnline;
-    private Integer batteryLevel;
-    private boolean isCharging;
-    private LocationResponseDto  lastLocation;
-    private GeofenceResponseDto currentGeofence;
-    private ActivitySummaryResponseDto dailyActivitySummary;
+
+    private String full_name;
+
+    private String avatar_url;
+
+    private boolean is_online;
+
+
+    private boolean is_charging;
+
+    private LocationResponseDto  last_location;
+
+    private GeofenceResponseDto current_geofence;
+
+    private ActivitySummaryResponseDto daily_activity_summary;
 }

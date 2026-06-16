@@ -14,13 +14,22 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class GeofenceResponseDto {
+
     private UUID id;
+
     private String name;
-    private Double centerLat;
-    private Double centerLon;
-    private Double radiusMetres;
+
+    private Double center_lat;
+
+    private Double center_lon;
+
+    private Double radius_metres;
+
     private Geofences_Type type;
-    private boolean isActive;
-    private boolean notifyOnEnter;
-    private boolean notifyOnExit;
+
+    private boolean is_active;
+
+    private boolean notify_on_enter;
+
+    private boolean notify_on_exit;
 }

@@ -28,7 +28,7 @@ public class Activities {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id", nullable = false)
-    Users child ;
+    Child child ;
 
     @Enumerated(EnumType.STRING)
     Activity_Type type;

@@ -21,14 +21,14 @@ import java.sql.Timestamp;
 public class Family_Relations {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
      UUID id ;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", nullable = true)
     Users parent;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id")
     Child child;
 
@@ -41,6 +41,7 @@ public class Family_Relations {
 
     @CreationTimestamp
     Timestamp created_at;
+
 
 
 }

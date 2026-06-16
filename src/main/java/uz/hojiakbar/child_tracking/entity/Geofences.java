@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 public class Geofences {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id ;
 
 
@@ -35,6 +35,8 @@ public class Geofences {
 
     @Column(nullable = false)
     String name;
+
+    Boolean lastKnownInside;
 
     BigDecimal centerLat;
 

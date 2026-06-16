@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RefreshTokenRequestDto {
-    private String refreshToken;
+    private String refresh_token;
 }

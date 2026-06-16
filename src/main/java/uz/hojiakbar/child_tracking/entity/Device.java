@@ -1,42 +1,53 @@
 package uz.hojiakbar.child_tracking.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import uz.hojiakbar.child_tracking.enums.Platform;
 
 import java.sql.Timestamp;
- import java.util.UUID;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(name = "device")
+@Entity
+@Table(name = "device")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Device {
     @Id
-    @GeneratedValue
-    UUID id ;
-    @Column(nullable = false)
+    UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private Users user;
+
+    @ManyToOne
+    @JoinColumn(name = "child_id")
+    @JsonIgnore
+    private Child child;
+
+    @Column(nullable = true)
     String device_name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String device_token;
 
-    @Column(nullable = false)
+    @Column(nullable = true)  // ← nullable = true ga o'zgartiring
     @Enumerated(EnumType.STRING)
     Platform platform;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String device_model;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String os_version;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     String app_version;
 
     Timestamp last_seen_at;

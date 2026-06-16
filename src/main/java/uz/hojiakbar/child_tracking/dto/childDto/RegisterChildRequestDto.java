@@ -2,6 +2,7 @@ package uz.hojiakbar.child_tracking.dto.childDto;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -30,7 +31,8 @@ public class RegisterChildRequestDto {
     @Enumerated(EnumType.STRING)
     Status status;
 
-    Date datedOfBirth;
+    @JoinColumn(name = "date_of_birth")
+    Date dated_of_birth;
 
     String phone;
 

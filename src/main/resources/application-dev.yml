@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://dpg-d8g48h6q1p3s73ctv8cg-a.oregon-postgres.render.com:5432/child_tracking_db
+    username: child_tracking_db_user
+    password: E9qRPmLpatEWv851osev17tlC758RVyG
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: qodirovxudoberdi1220@gmail.com
+    password: "qzaygqtepisytwze"
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+
+
+jwt:
+  secret: mySecretKeyForJwtTokenGenerationMustBe32Chars!

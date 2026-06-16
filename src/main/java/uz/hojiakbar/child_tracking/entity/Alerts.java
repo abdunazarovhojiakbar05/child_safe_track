@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import uz.hojiakbar.child_tracking.enums.Alert_Severity;
+import uz.hojiakbar.child_tracking.enums.Alert_Type;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class Alerts {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,10 +30,13 @@ public class Alerts {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id", nullable = false)
-    Users child_id;
+    Child child_id;
 
     @Enumerated(EnumType.STRING)
     Alert_Severity severity;
+
+    @Enumerated(EnumType.STRING)
+    Alert_Type type;
 
     @Column(nullable = false)
     String title;
